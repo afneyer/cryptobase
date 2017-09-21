@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<configuration>
+	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<file>logs/logfile.log</file>
+		<append>false</append>
+		<encoder>
+			<pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
+		</encoder>
+	</appender>
+
+
+	<appender name="IMPORT" class="ch.qos.logback.core.FileAppender">
+		<file>logs/import.log</file>
+		<append>false</append>
+		<encoder>
+			<pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- additivity=false ensures import data only goes to the import log -->
+	<logger name="import" level="INFO" additivity="false">
+		<appender-ref ref="IMPORT" />
+	</logger>
+
+	<appender name="APP" class="ch.qos.logback.core.FileAppender">
+		<file>logs/realStatApp.log</file>
+		<append>false</append>
+		<encoder>
+			<pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- additivity=false ensures import data only goes to the import log -->
+	<logger name="app" level="INFO" additivity="false">
+		<appender-ref ref="APP" />
+	</logger>
+
+
+	<root level="INFO">
+		<appender-ref ref="FILE" />
+	</root>
+</configuration>

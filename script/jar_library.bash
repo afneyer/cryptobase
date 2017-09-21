@@ -1,0 +1,1 @@
+mvn install:install-file -Dfile=./src_external/yago_naga/javatools.jar -DgroupId=yago_naga -DartifactId=javatools -Dversion=1.0 -Dpackaging=jar -DlocalRepositoryPath=./repo
