@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MoneroBlockApi {
@@ -19,17 +20,22 @@ public class MoneroBlockApi {
 		String blkNbrStr = Long.toString(blkNbr);
 
 		JSONObject jsn0 = getApiResponseAsJson(ApiEndpoint + ApiGetBlockData + blkNbrStr);
-		JSONObject jsn1 = (JSONObject) jsn0.get("block_header");
+		JSONObject jsn1;
+		MoneroBlock blk = null;
+		try {
+			jsn1 = (JSONObject) jsn0.get("block_header");
+			Long timestamp = jsn1.getLong("timestamp");
 
-		Long timestamp = jsn1.getLong("timestamp");
+			blk = new MoneroBlock(blkNbr, timestamp);
 
-		MoneroBlock blk = new MoneroBlock(blkNbr, timestamp);
-
-		blk.setDifficulty(jsn1.getLong("difficulty"));
-		blk.setOrphanStatus(jsn1.getBoolean("orphan_status"));
-		blk.setReward(jsn1.getLong("reward"));
-		blk.setSize(jsn1.getLong("block_size"));
-		blk.setStatus(jsn0.getString("status"));
+			blk.setDifficulty(jsn1.getLong("difficulty"));
+			blk.setOrphanStatus(jsn1.getBoolean("orphan_status"));
+			blk.setReward(jsn1.getLong("reward"));
+			blk.setSize(jsn1.getLong("block_size"));
+			blk.setStatus(jsn0.getString("status"));
+		} catch (JSONException e) {
+			throw new RuntimeException("Cannot find field in MoneroBlockApi " + jsn0.toString() + e);
+		}
 
 		return blk;
 	}
@@ -66,7 +72,7 @@ public class MoneroBlockApi {
 			inStream.close();
 
 		} catch (IOException e) {
-			throw new RuntimeException( "Error in httpReponse for URL " + ApiUrl, e);
+			throw new RuntimeException("Error in httpReponse for URL " + ApiUrl, e);
 		}
 
 		System.out.println("Sending get request : " + url);
@@ -74,14 +80,19 @@ public class MoneroBlockApi {
 		System.out.println("Response message : " + responseMessage);
 		System.out.println("Response content :" + msgContent);
 
-		jsn = new JSONObject(msgContent.toString());
+		try {
+			jsn = new JSONObject(msgContent.toString());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		return jsn;
 	}
 
 	public static void fillMoneroBlockDbRecent() {
 		Long startIndex = getMostRecentBlockNbr();
-		
+
 		// get repository
 		MoneroBlock refBlk = MoneroBlockApi.getBlock(MoneroBlock.refBlockNbr);
 		MoneroBlockRepository repo = refBlk.getRepo();
@@ -97,26 +108,29 @@ public class MoneroBlockApi {
 	public static Long getMostRecentBlockNbr() {
 		Long blkNbr = 0L;
 		JSONObject jsn = getApiResponseAsJson(ApiEndpoint + "get_stats");
-		blkNbr = jsn.getLong("height");
+		try {
+			blkNbr = jsn.getLong("height");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return blkNbr;
 	}
-	
-	
-	
+
 	public static void fillMoneroHistorical() {
-		
+
 		Long refBlockNbr = MoneroBlock.refBlockNbr;
 		Long startIndex = refBlockNbr;
-	
+
 		// get repository
 		MoneroBlock refBlk = MoneroBlockApi.getBlock(MoneroBlock.refBlockNbr);
 		MoneroBlockRepository repo = refBlk.getRepo();
-		
+
 		Long minBlkNbr = repo.findLowestBlockNbr();
 		if (minBlkNbr != null) {
-			startIndex = minBlkNbr-1;
+			startIndex = minBlkNbr - 1;
 		}
-		
+
 		Long endIndex = 0L;
 
 		for (Long l = startIndex; l > endIndex; l--) {
@@ -124,9 +138,7 @@ public class MoneroBlockApi {
 			blk.save();
 			System.out.println("Created or Updated Block " + l);
 		}
-		
+
 	}
-	
-	
 
 }

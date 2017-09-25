@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MoneroHourlyApi {
@@ -46,38 +47,45 @@ public class MoneroHourlyApi {
 
 		JSONObject jsn0 = getApiResponseAsJson(apiEndpoint+getData);
 		
-		JSONArray jsnHourlyList = (JSONArray) jsn0.get("Data");
-		
-		Long previousTimestamp = 0L;
-		
-		for (int i = 0; i<jsnHourlyList.length()-1 ; i++) {
-			JSONObject record = jsnHourlyList.getJSONObject(i);
-			System.out.println(record);
+		JSONArray jsnHourlyList;
+		try {
+			jsnHourlyList = (JSONArray) jsn0.get("Data");
+			Long previousTimestamp = 0L;
 			
-			// get all the info from the record
-			Long timestamp = new Long(record.getLong("time"));
-			if (previousTimestamp == 0L) {
-				previousTimestamp = timestamp - 3600L;
+			for (int i = 0; i<jsnHourlyList.length()-1 ; i++) {
+				JSONObject record = jsnHourlyList.getJSONObject(i);
+				System.out.println(record);
+				
+				// get all the info from the record
+				Long timestamp = new Long(record.getLong("time"));
+				if (previousTimestamp == 0L) {
+					previousTimestamp = timestamp - 3600L;
+				}
+				
+				if (timestamp != previousTimestamp + 3600L) {
+					System.out.println("Computing time stamp at " + MoneroBlock.toLocalDateTime(timestamp) + " as average");
+				}
+				previousTimestamp = timestamp;
+				
+				Double high = record.getDouble("high");
+				Double low = record.getDouble("low");
+				Double close = record.getDouble("close");
+				Double open = record.getDouble("high");
+				
+				Double averageRate = (high+low+close+open)/4.0;
+				
+				MoneroHourlyRepository mhRepo = MoneroHourly.getRepoStatic();
+				MoneroHourly mh = mhRepo.findByStartTimestamp(timestamp);
+				setExchangeRate(mh,currencySymbol,averageRate);
+				
+				mh.saveOrUpdate();
 			}
-			
-			if (timestamp != previousTimestamp + 3600L) {
-				System.out.println("Computing time stamp at " + MoneroBlock.toLocalDateTime(timestamp) + " as average");
-			}
-			previousTimestamp = timestamp;
-			
-			Double high = record.getDouble("high");
-			Double low = record.getDouble("low");
-			Double close = record.getDouble("close");
-			Double open = record.getDouble("high");
-			
-			Double averageRate = (high+low+close+open)/4.0;
-			
-			MoneroHourlyRepository mhRepo = MoneroHourly.getRepoStatic();
-			MoneroHourly mh = mhRepo.findByStartTimestamp(timestamp);
-			setExchangeRate(mh,currencySymbol,averageRate);
-			
-			mh.saveOrUpdate();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
+	
 	}
 	
 	private static void setExchangeRate(MoneroHourly mh, String currencyCode, Double value) {
@@ -131,7 +139,12 @@ public class MoneroHourlyApi {
 		System.out.println("Response message : " + responseMessage);
 		System.out.println("Response content :" + msgContent);
 
-		jsn = new JSONObject(msgContent.toString());
+		try {
+			jsn = new JSONObject(msgContent.toString());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		return jsn;
 	}

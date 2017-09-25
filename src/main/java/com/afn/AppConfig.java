@@ -1,4 +1,4 @@
-package com.afn.realstat;
+package com.afn;
 
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
@@ -27,9 +27,9 @@ import com.afn.realstat.framework.SpringApplicationContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 @Configuration
-@ComponentScan
+@ComponentScan(basePackages = {"com.afn.*"})
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "com.afn.realstat")
+@EnableJpaRepositories(basePackages = {"com.afn.*"})
 @EnableAutoConfiguration
 class AppConfig {
 
@@ -70,7 +70,7 @@ class AppConfig {
 	public DataSource dbTest1DataSource() {
 		DriverManagerDataSource ds = new DriverManagerDataSource();
 		ds.setDriverClassName(com.mysql.jdbc.Driver.class.getName());
-		ds.setUrl("jdbc:mysql://localhost:3306/test1?useSSL=false");
+		ds.setUrl("jdbc:mysql://localhost:3306/crypto_test?SSL=false");
 		ds.setUsername("root");
 		ds.setPassword("admin");
 		return ds;
@@ -79,7 +79,7 @@ class AppConfig {
 	public DataSource testDataSource() {
 		DriverManagerDataSource ds = new DriverManagerDataSource();
 		ds.setDriverClassName(com.mysql.jdbc.Driver.class.getName());
-		ds.setUrl("jdbc:mysql://localhost:3306/test1?useSSL=false");
+		ds.setUrl("jdbc:mysql://localhost:3306/crypto_test?useSSL=false");
 		ds.setUsername("root");
 		ds.setPassword("admin");
 		return ds;
@@ -94,7 +94,7 @@ class AppConfig {
 		}
 
 		// load the JDBC-driver
-		cpds.setJdbcUrl("jdbc:mysql://localhost:3306/test?useSSL=false");
+		cpds.setJdbcUrl("jdbc:mysql://localhost:3306/crypto_test?useSSL=false");
 		cpds.setUser("root");
 		cpds.setPassword("admin");
 

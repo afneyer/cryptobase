@@ -54,7 +54,7 @@ class ProdContext {
 		} 
 		
 		//load the JDBC-driver
-		cpds.setJdbcUrl( "jdbc:mysql://localhost:3306/test?useSSL=false" );
+		cpds.setJdbcUrl( "jdbc:mysql://localhost:3306/crypto_prod?useSSL=false" );
 		cpds.setUser("root");
 		cpds.setPassword("admin");
 

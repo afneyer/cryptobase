@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MoneroBlockHourlyApi {
@@ -23,11 +24,18 @@ public class MoneroBlockHourlyApi {
 		String getData = apiGetData.replace("XXX", currencySymbol);
 		getData = getData.replace("YYY", timestampString);
 
+		
 		JSONObject jsn0 = getApiResponseAsJson(apiEndpoint + getData);
-		JSONObject jsn1 = (JSONObject) jsn0.get("block_header");
-
-		@SuppressWarnings("unchecked")
-		String jsnHourlyList = (String) jsn0.get("Data");
+		try {
+			
+			JSONObject jsn1 = (JSONObject) jsn0.get("block_header");
+			@SuppressWarnings("unchecked")
+			String jsnHourlyList = (String) jsn0.get("Data");
+		
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
@@ -71,7 +79,12 @@ public class MoneroBlockHourlyApi {
 		System.out.println("Response message : " + responseMessage);
 		System.out.println("Response content :" + msgContent);
 
-		jsn = new JSONObject(msgContent.toString());
+		try {
+			jsn = new JSONObject(msgContent.toString());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		return jsn;
 	}
