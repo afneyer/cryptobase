@@ -1,6 +1,7 @@
 package com.afn.cryptobase.core;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -33,5 +34,8 @@ public interface MoneroBlockRepository extends AbstractEntityRepository<MoneroBl
 		return list;
 
 	}
+
+	@Query("SELECT blockNbr from MoneroBlock where blockNbr >= ?1 and blockNbr <= ?2")
+	ArrayList<Long> getBlockNumbers(Long startIndex, Long endIndex);
 
 }

@@ -1,6 +1,8 @@
 package com.afn.cryptobase.core;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -17,6 +19,9 @@ public class MoneroHourlyManager extends AbstractEntityManager<MoneroHourly> {
 	
 	@Autowired
 	MoneroBlockRepository mbRepo;
+	
+	@Autowired
+	MoneroBlockApi mbApi;
 
 	/*
 	 * assumes all moneroBlocks are available
@@ -45,13 +50,21 @@ public class MoneroHourlyManager extends AbstractEntityManager<MoneroHourly> {
 
 	public void fillMoneroHourlyDb() {
 
-		LocalDateTime current = LocalDateTime.now();
+		LocalDateTime current =LocalDateTime.now(Clock.systemUTC());
 
 		// round down to the startTime latest complete hour
 		LocalDateTime latestHour = MoneroBlock.roundDownToHour(current);
 		latestHour = latestHour.minusSeconds(3600L);
 
 		MoneroHourlyRepository mhRepo = MoneroHourly.getRepoStatic();
+		
+		// if the block records don't exist yet for this hour, top of the MoneroBlock database with the latest records
+		Long blkNbr = mbRepo.findHeighestBlockNbr();
+		LocalDateTime blkLdt = mbRepo.findByBlockNbr(blkNbr).getDateHour();
+		if (blkLdt.isBefore(latestHour.plusSeconds(3600L)) ) {
+			mbApi.fillMoneroBlockDbRecent();
+		}
+		
 		// LocalDateTime firstHour = MoneroBlock.toLocalDateTime(mhRepo.findEarliestRecordTimestamp());
 	
 		// LocalDateTime lastHour = MoneroBlock.toLocalDateTime(mhRepo.findLatestRecodTimestamp());

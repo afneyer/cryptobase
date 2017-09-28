@@ -49,6 +49,11 @@ public class MoneroBlockApiTest {
 	public void testFillMoneroDbHistorical() {
 		mbApi.fillMoneroHistorical();
 	}
+	
+	@Test
+	public void testFillMoneroDb() {
+		mbApi.fillMoneroDb();
+	}
 
 	@Test
 	// TODO fix this test, not clear why repository is not available 

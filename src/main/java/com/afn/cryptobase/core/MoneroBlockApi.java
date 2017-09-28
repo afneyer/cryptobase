@@ -15,12 +15,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MoneroBlockApi {
-	
+
 	private static String ApiEndpoint = "http://moneroblocks.info/api/";
 	private static String ApiGetBlockData = "get_block_header/";
 
+	@Autowired
 	private MoneroBlockRepository mbRepo;
-	
+
 	public MoneroBlock getBlock(Long blkNbr) {
 
 		String blkNbrStr = Long.toString(blkNbr);
@@ -137,6 +138,31 @@ public class MoneroBlockApi {
 			MoneroBlock blk = getBlock(l);
 			blk.save();
 			System.out.println("Created or Updated Block " + l);
+		}
+
+	}
+
+	public void fillMoneroDb() {
+		Long mostRecentBlock = getMostRecentBlockNbr();
+		Long batchSize = 1000L;
+		Long startBatch = (mostRecentBlock / batchSize) + 1;
+		Long endBatch = 1L;
+		
+
+		for (Long l = startBatch; l >= endBatch; l--) {
+
+			Long startIndex = (l - 1L) * batchSize + 1L;
+			Long endIndex = startIndex + batchSize - 1L;
+			endIndex = Math.min(endIndex, mostRecentBlock);
+			ArrayList<Long> blkList = mbRepo.getBlockNumbers(startIndex, endIndex);
+
+			for (Long k = startIndex; k <= endIndex; k++) {
+				if (!blkList.contains(k)) {
+					MoneroBlock blk = getBlock(k);
+					blk.saveOrUpdate();
+					System.out.println("Created Block " + k);
+				}
+			}
 		}
 
 	}
