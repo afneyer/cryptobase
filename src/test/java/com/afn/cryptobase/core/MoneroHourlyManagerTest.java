@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import com.afn.realstat.Application;
+import com.afn.Application;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -21,7 +21,10 @@ import com.afn.realstat.Application;
 public class MoneroHourlyManagerTest {
 
 	@Autowired
-	MoneroHourlyRepository repo;
+	MoneroHourlyRepository mhRepo;
+	
+	@Autowired
+	MoneroHourlyManager mhMgt;
 
 	@Test
 	public void testMoneroHourlyCreation() {
@@ -33,7 +36,7 @@ public class MoneroHourlyManagerTest {
 
 		// retrieve the record again
 		Long epochSeconds = MoneroHourly.toEpochSeconds(ldt);
-		mh = repo.findByStartTimestamp(epochSeconds);
+		mh = mhRepo.findByStartTimestamp(epochSeconds);
 
 		// verify time stamps
 		assertEquals(epochSeconds, mh.getStartTimestamp());
@@ -48,7 +51,7 @@ public class MoneroHourlyManagerTest {
 		mh.saveOrUpdate();
 
 		// retrieve the record again and verify field
-		mh = repo.findByStartTimestamp(epochSeconds);
+		mh = mhRepo.findByStartTimestamp(epochSeconds);
 		assertEquals(new Long(15), mh.getDifficulty());
 
 	}
@@ -65,7 +68,8 @@ public class MoneroHourlyManagerTest {
 	
 	@Test
 	public void fillMoneroHourlyDb() {
-		MoneroHourlyManager.fillMoneroHourlyDb();
+		// new MoneroHourlyManager().fillMoneroHourlyDb();
+		mhMgt.fillMoneroHourlyDb();
 	}
 
 }

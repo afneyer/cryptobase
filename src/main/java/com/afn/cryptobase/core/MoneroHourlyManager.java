@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.afn.realstat.AbstractEntityManager;
@@ -13,16 +14,18 @@ import com.afn.realstat.AbstractEntityManager;
 public class MoneroHourlyManager extends AbstractEntityManager<MoneroHourly> {
 
 	public static final Logger log = LoggerFactory.getLogger("app");
+	
+	@Autowired
+	MoneroBlockRepository mbRepo;
 
 	/*
 	 * assumes all moneroBlocks are available
 	 */
-	public static MoneroHourly createMoneroHourly(LocalDateTime startDateTime) {
+	public MoneroHourly createMoneroHourly(LocalDateTime startDateTime) {
 
 		MoneroHourly mh = new MoneroHourly(startDateTime);
 
 		// find all blocks for the hour
-		MoneroBlockRepository mbRepo = MoneroBlock.getRepoStatic();
 		List<MoneroBlock> blockList = mbRepo.findBlocksByStartHour(startDateTime);
 
 		mh.setFirstBlockNbr(blockList.get(0).getBlockNbr());
@@ -40,7 +43,7 @@ public class MoneroHourlyManager extends AbstractEntityManager<MoneroHourly> {
 		return mh;
 	}
 
-	public static void fillMoneroHourlyDb() {
+	public void fillMoneroHourlyDb() {
 
 		LocalDateTime current = LocalDateTime.now();
 
@@ -58,7 +61,7 @@ public class MoneroHourlyManager extends AbstractEntityManager<MoneroHourly> {
 		while (/*ldt.isAfter(firstHour) &&*/ ldt.isAfter(firstBlockHour)) {
 			MoneroHourly mh = mhRepo.findByStartTimestamp(MoneroBlock.toMoneroTimestamp(ldt));
 			if (mh == null) {
-				mh = MoneroHourlyManager.createMoneroHourly(ldt);
+				mh = createMoneroHourly(ldt);
 				mh.saveOrUpdate();
 			}
 			ldt= ldt.minusSeconds(3600);

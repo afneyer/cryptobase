@@ -27,9 +27,9 @@ import com.afn.realstat.framework.SpringApplicationContext;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 @Configuration
-@ComponentScan(basePackages = {"com.afn.*"})
+@ComponentScan(basePackages = {"com.afn.realstat","com.afn.cryptobase.core"})
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = {"com.afn.*"})
+@EnableJpaRepositories(basePackages = {"com.afn.realstat","com.afn.cryptobase.core"})
 @EnableAutoConfiguration
 class AppConfig {
 

@@ -4,8 +4,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.afn.realstat</groupId>
-	<artifactId>realstat-app</artifactId>
+	<groupId>com.afn.cryptobase</groupId>
+	<artifactId>cryptobase-app</artifactId>
 	<version>0.1.0</version>
 
 	<parent>
@@ -96,9 +96,9 @@
 		<dependency>
 			<groupId>com.skovalenko.geocoder.address_parser</groupId>
 			<artifactId>us_address_parser</artifactId>
-			<version>1.0</version>
+			<version>0.2</version>
 			<scope>system</scope>
-			<systemPath>${basedir}/src_external/address_parser/us_address_parser-1.0.jar</systemPath>
+			<systemPath>${basedir}/lib/us-address-parser-0.2-SNAPSHOT.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -106,7 +106,7 @@
 			<artifactId>java_tools</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>${basedir}/src_external/yago_naga/javatools.jar</systemPath>
+			<systemPath>${basedir}/lib/javatools-1.0-SNAPSHOT.jar</systemPath>
 		</dependency>
 
 		<dependency>

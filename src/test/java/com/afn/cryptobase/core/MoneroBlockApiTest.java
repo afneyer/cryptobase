@@ -10,28 +10,30 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.afn.realstat.Application;
+import com.afn.Application;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 @ActiveProfiles("dev")
 @WebAppConfiguration
 public class MoneroBlockApiTest {
-
+	
 	@Autowired
-	MoneroBlockTest repo;
-
+	MoneroBlockApi mbApi;
+	
 	@Test
 	public void testApiGetBlockData() {
-		MoneroBlock blk = MoneroBlockApi.getBlock(MoneroBlock.refBlockNbr);
-
+		MoneroBlock blk = mbApi.getBlock(MoneroBlock.refBlockNbr);
+		
 		assertEquals(blk.getBlockNbr(), MoneroBlock.refBlockNbr);
 		assertEquals(blk.getTimestamp(), MoneroBlock.refBlockTimestamp);
-		assertEquals(blk.getDateTime().toString(), MoneroBlock.refBlockDateTime);
+		assertEquals(blk.getDateTime(), MoneroBlock.refBlockDateTime);
 		assertEquals(blk.getDifficulty(), MoneroBlock.refBlockDifficulty);
 		assertEquals(blk.getHashRate(), new Long(MoneroBlock.refBlockDifficulty / MoneroBlock.getBlockTime()));
 		assertEquals(blk.getBlockDate(), MoneroBlock.refBlockDateTime.toLocalDate());
@@ -40,17 +42,19 @@ public class MoneroBlockApiTest {
 
 	@Test
 	public void testFillMoneroDBRecent() {
-		MoneroBlockApi.fillMoneroBlockDbRecent();
+		mbApi.fillMoneroBlockDbRecent();
 	}
 
 	@Test
 	public void testFillMoneroDbHistorical() {
-		MoneroBlockApi.fillMoneroHistorical();
+		mbApi.fillMoneroHistorical();
 	}
 
 	@Test
+	// TODO fix this test, not clear why repository is not available 
 	public void testUpdateReferenceBlock() {
-		MoneroBlock blk = MoneroBlockApi.getBlock(MoneroBlock.refBlockNbr);
+
+		MoneroBlock blk = mbApi.getBlock(MoneroBlock.refBlockNbr);
 		blk.saveOrUpdate();
 	}
 
@@ -58,14 +62,15 @@ public class MoneroBlockApiTest {
 	public void testGetMostRecentBlockNbr() {
 
 		// Verify block is more recent than reference block
-		long blkNbr = MoneroBlockApi.getMostRecentBlockNbr();
+		long blkNbr = mbApi.getMostRecentBlockNbr();
 		assertTrue(blkNbr > MoneroBlock.refBlockNbr);
 		System.out.println("Most Recent Block :" + blkNbr);
 
 		// Get current time in UTC
 		LocalDateTime nowUTC = LocalDateTime.now(ZoneId.of("UTC"));
+		
 		// Verify that block was created before the current time
-		MoneroBlock blk = MoneroBlockApi.getBlock(blkNbr);
+		MoneroBlock blk = mbApi.getBlock(blkNbr);
 		LocalDateTime ldtBlk = blk.getDateTime();
 		System.out.println("Most Recent Block Time : " + ldtBlk);
 		assertTrue(nowUTC.isAfter(ldtBlk));
@@ -80,7 +85,7 @@ public class MoneroBlockApiTest {
 
 	@Test
 	public void testFirstBlockTimes() {
-		MoneroBlock blk = MoneroBlockApi.getBlock(1L);
+		MoneroBlock blk = mbApi.getBlock(1L);
 		assertTrue(blk.getDateTime().equals(MoneroBlock.firstBlockDateTime));
 		assertTrue(blk.getDateHour().equals(MoneroBlock.firstBlockHour));
 	}

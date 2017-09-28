@@ -23,7 +23,7 @@ public abstract class AbstractEntity {
 	
 	@Override
 	public String toString() {
-		return String.format( "Entity Class = %s, Id= %2 ]", this.getClass(), id );
+		return String.format( "Entity Class = %s, Id= %s ]", this.getClass(), id );
 	}
 	
 	@Override

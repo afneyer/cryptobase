@@ -10,10 +10,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.afn.Application;
 import com.afn.realstat.AbstractEntityRepository;
 import com.afn.realstat.Agent;
 import com.afn.realstat.AgentRepository;
-import com.afn.realstat.Application;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.NONE)

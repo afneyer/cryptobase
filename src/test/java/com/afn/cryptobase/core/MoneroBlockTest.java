@@ -14,7 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import com.afn.realstat.Application;
+import com.afn.Application;
 import com.querydsl.core.types.Predicate;
 
 @RunWith(SpringRunner.class)
@@ -34,7 +34,7 @@ public class MoneroBlockTest {
 		
 		LocalDateTime startTime = MoneroBlock.refBlockDateHour;
 		LocalDateTime endTime = startTime.plusSeconds(3600-1);
-		MoneroHourly mh = MoneroHourlyManager.createMoneroHourly(startTime);
+		MoneroHourly mh = new MoneroHourlyManager().createMoneroHourly(startTime);
 		
 		Long averageDifficulty = 31990172403L;
 		assertEquals(averageDifficulty, mh.getDifficulty());

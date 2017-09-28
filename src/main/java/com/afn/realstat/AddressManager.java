@@ -16,8 +16,6 @@ public class AddressManager extends AbstractEntityManager<Address> {
 	@Autowired
 	AddressRepository adrRepo;
 
-	@Autowired
-	RealPropertyRepository rpRepo;
 
 	// move the superclass
 	public AddressManager(AddressRepository adrRepo) {
@@ -65,46 +63,4 @@ public class AddressManager extends AbstractEntityManager<Address> {
 		return p;
 	}
 
-	public void removeAllDuplicates() {
-
-		Iterable<Address> adrList = adrRepo.findAll();
-		for (Address adr : adrList) {
-			removeDuplicates(adr);
-		}
-	}
-
-	@Transactional
-	public Boolean removeDuplicates(Address adr) {
-		log.warn("Removing duplicates from adresses: " + adr.getDetails());
-		Boolean ret = true;
-		Example<Address> example = adr.getRefExample();
-		long numFound = adrRepo.count(example);
-		log.info("Found " + numFound + " addresses");
-
-		// if multiple addresses are found try to delete this one
-		if (numFound > 1) {
-			log.warn("Found " + numFound + " duplicates of address " + adr.getDetails());
-
-			BooleanExpression predicate = QRealProperty.realProperty.propertyAdr.eq(adr);
-			// check whether other entities point to this transaction
-			long count = rpRepo.count(predicate);
-			if (count == 0) {
-				try {
-					adrRepo.delete(adr);
-					adrRepo.flush();
-					log.info("Deleted address:" + adr);
-				} catch (Exception e) {
-					log.warn("Cannnot delete address: " + adr);
-					log.warn(e.toString());
-					throw new RuntimeException(e);
-				}
-			} else {
-				log.warn("Cannot delete address because a real property uses it! Adress: " + adr.getDetails());
-			}
-		}
-		if (numFound == 0) {
-			log.error("Could not find Address with itself as example: " + adr);
-		}
-		return ret;
-	}
 }

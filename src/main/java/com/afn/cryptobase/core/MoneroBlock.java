@@ -98,13 +98,7 @@ public class MoneroBlock extends AbstractEntity {
 		}
 		return repo;
 	}
-	
-	public static MoneroBlockRepository getRepoStatic() {
-		if (repo == null) {
-			repo = (MoneroBlockRepository) SpringApplicationContext.getBean("moneroBlockRepository");
-		}
-		return repo;
-	}
+
 
 	@Override
 	public void save() {

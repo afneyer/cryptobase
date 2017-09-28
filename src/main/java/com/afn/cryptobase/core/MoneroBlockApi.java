@@ -6,16 +6,22 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MoneroBlockApi {
-
+	
 	private static String ApiEndpoint = "http://moneroblocks.info/api/";
 	private static String ApiGetBlockData = "get_block_header/";
 
-	public static MoneroBlock getBlock(Long blkNbr) {
+	private MoneroBlockRepository mbRepo;
+	
+	public MoneroBlock getBlock(Long blkNbr) {
 
 		String blkNbrStr = Long.toString(blkNbr);
 
@@ -90,22 +96,20 @@ public class MoneroBlockApi {
 		return jsn;
 	}
 
-	public static void fillMoneroBlockDbRecent() {
+	public void fillMoneroBlockDbRecent() {
 		Long startIndex = getMostRecentBlockNbr();
 
-		// get repository
-		MoneroBlock refBlk = MoneroBlockApi.getBlock(MoneroBlock.refBlockNbr);
-		MoneroBlockRepository repo = refBlk.getRepo();
-		Long endIndex = repo.findHeighestBlockNbr();
+		MoneroBlockRepository mbr = new MoneroBlock().getRepo();
+		Long endIndex = mbr.findHeighestBlockNbr();
 
 		for (Long l = startIndex; l > endIndex; l--) {
-			MoneroBlock blk = MoneroBlockApi.getBlock(l);
+			MoneroBlock blk = getBlock(l);
 			blk.saveOrUpdate();
 			System.out.println("Created or Updated Block " + l);
 		}
 	}
 
-	public static Long getMostRecentBlockNbr() {
+	public Long getMostRecentBlockNbr() {
 		Long blkNbr = 0L;
 		JSONObject jsn = getApiResponseAsJson(ApiEndpoint + "get_stats");
 		try {
@@ -117,16 +121,12 @@ public class MoneroBlockApi {
 		return blkNbr;
 	}
 
-	public static void fillMoneroHistorical() {
+	public void fillMoneroHistorical() {
 
 		Long refBlockNbr = MoneroBlock.refBlockNbr;
 		Long startIndex = refBlockNbr;
 
-		// get repository
-		MoneroBlock refBlk = MoneroBlockApi.getBlock(MoneroBlock.refBlockNbr);
-		MoneroBlockRepository repo = refBlk.getRepo();
-
-		Long minBlkNbr = repo.findLowestBlockNbr();
+		Long minBlkNbr = new MoneroBlock().getRepo().findLowestBlockNbr();
 		if (minBlkNbr != null) {
 			startIndex = minBlkNbr - 1;
 		}
@@ -134,7 +134,7 @@ public class MoneroBlockApi {
 		Long endIndex = 0L;
 
 		for (Long l = startIndex; l > endIndex; l--) {
-			MoneroBlock blk = MoneroBlockApi.getBlock(l);
+			MoneroBlock blk = getBlock(l);
 			blk.save();
 			System.out.println("Created or Updated Block " + l);
 		}
