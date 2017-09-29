@@ -10,11 +10,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.afn.Application;
 
@@ -23,14 +21,17 @@ import com.afn.Application;
 @ActiveProfiles("dev")
 @WebAppConfiguration
 public class MoneroBlockApiTest {
-	
+
 	@Autowired
 	MoneroBlockApi mbApi;
-	
+
+	@Autowired
+	MoneroBlockRepository mbRepo;
+
 	@Test
 	public void testApiGetBlockData() {
 		MoneroBlock blk = mbApi.getBlock(MoneroBlock.refBlockNbr);
-		
+
 		assertEquals(blk.getBlockNbr(), MoneroBlock.refBlockNbr);
 		assertEquals(blk.getTimestamp(), MoneroBlock.refBlockTimestamp);
 		assertEquals(blk.getDateTime(), MoneroBlock.refBlockDateTime);
@@ -43,20 +44,35 @@ public class MoneroBlockApiTest {
 	@Test
 	public void testFillMoneroDBRecent() {
 		mbApi.fillMoneroBlockDbRecent();
+		mbApi.fillMoneroBlockDbRecent();
+		assertTrue( mbApi.isUpdated() );
 	}
 
 	@Test
 	public void testFillMoneroDbHistorical() {
 		mbApi.fillMoneroHistorical();
 	}
-	
+
 	@Test
 	public void testFillMoneroDb() {
 		mbApi.fillMoneroDb();
 	}
 
 	@Test
-	// TODO fix this test, not clear why repository is not available 
+	public void testBlockDbCompleteness() {
+		boolean complete = mbApi.isComplete();
+		Long missingBlocks = mbApi.countMissingBlocks(mbRepo.findHeighestBlockNbr());
+		System.out.println("Missing Blocks = " + missingBlocks.toString());
+		if (complete) {
+			assertEquals(new Long(0), missingBlocks);
+		} else {
+			assertTrue(missingBlocks > 0);
+		}
+
+	}
+
+	@Test
+	// TODO fix this test, not clear why repository is not available
 	public void testUpdateReferenceBlock() {
 
 		MoneroBlock blk = mbApi.getBlock(MoneroBlock.refBlockNbr);
@@ -73,7 +89,7 @@ public class MoneroBlockApiTest {
 
 		// Get current time in UTC
 		LocalDateTime nowUTC = LocalDateTime.now(ZoneId.of("UTC"));
-		
+
 		// Verify that block was created before the current time
 		MoneroBlock blk = mbApi.getBlock(blkNbr);
 		LocalDateTime ldtBlk = blk.getDateTime();

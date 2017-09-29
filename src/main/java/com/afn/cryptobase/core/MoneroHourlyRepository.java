@@ -25,5 +25,8 @@ public interface MoneroHourlyRepository extends AbstractEntityRepository<MoneroH
 	
 	@Query("SELECT startTimestamp from MoneroHourly where startTimestamp >= ?1 and startTimestamp < ?2")
 	ArrayList<Long> getHourList(Long startTimestamp, Long endTimestamp);
+	
+	@Query("select mh from MoneroHourly mh where mod(mh.startTimestamp,3600) != 0")
+	ArrayList<MoneroHourly> getInvalidRecords();
 
 }

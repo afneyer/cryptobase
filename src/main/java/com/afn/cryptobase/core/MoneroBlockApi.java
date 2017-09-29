@@ -98,16 +98,21 @@ public class MoneroBlockApi {
 	}
 
 	public void fillMoneroBlockDbRecent() {
-		Long startIndex = getMostRecentBlockNbr();
+		Long startBlockNbr = getMostRecentBlockNbr();
+		Long endBlockNbr = MoneroBlock.refBlockNbr;
+		fillMoneroDb(startBlockNbr, endBlockNbr);
+	}
 
-		MoneroBlockRepository mbr = new MoneroBlock().getRepo();
-		Long endIndex = mbr.findHeighestBlockNbr();
+	public void fillMoneroHistorical() {
+		Long startBlockNbr = MoneroBlock.refBlockNbr;
+		Long endBlockNbr = 1L;
+		fillMoneroDb(startBlockNbr, endBlockNbr);
+	}
 
-		for (Long l = startIndex; l > endIndex; l--) {
-			MoneroBlock blk = getBlock(l);
-			blk.saveOrUpdate();
-			System.out.println("Created or Updated Block " + l);
-		}
+	public void fillMoneroDb() {
+		Long startBlockNbr = MoneroBlock.refBlockNbr;
+		Long endBlockNbr = 1L;
+		fillMoneroDb(startBlockNbr, endBlockNbr);
 	}
 
 	public Long getMostRecentBlockNbr() {
@@ -122,49 +127,49 @@ public class MoneroBlockApi {
 		return blkNbr;
 	}
 
-	public void fillMoneroHistorical() {
+	private void fillMoneroDb(Long startBlockNbr, Long endBlockNbr) {
 
-		Long refBlockNbr = MoneroBlock.refBlockNbr;
-		Long startIndex = refBlockNbr;
+		Long batchSize = 1000L;
+		Long startBatch = (startBlockNbr / batchSize) + 1;
+		Long endBatch = (endBlockNbr / batchSize) + 1;
 
-		Long minBlkNbr = new MoneroBlock().getRepo().findLowestBlockNbr();
-		if (minBlkNbr != null) {
-			startIndex = minBlkNbr - 1;
-		}
+		for (Long l = startBatch; l >= endBatch; l--) {
+			Long startIndex = (l - 1L) * batchSize + 1L;
+			Long endIndex = startIndex + batchSize - 1L;
+			endIndex = Math.min(endIndex, startBlockNbr);
 
-		Long endIndex = 0L;
-
-		for (Long l = startIndex; l > endIndex; l--) {
-			MoneroBlock blk = getBlock(l);
-			blk.save();
-			System.out.println("Created or Updated Block " + l);
+			ArrayList<Long> blkList = mbRepo.getBlockNumbers(startIndex, endIndex);
+			
+			// check whether the batch has missing records
+			if (blkList.size() < endIndex - startIndex + 1) {
+				
+				for (Long k = startIndex; k <= endIndex; k++) {
+					if (!blkList.contains(k)) {
+						MoneroBlock blk = getBlock(k);
+						blk.saveOrUpdate();
+						System.out.println("Created Block " + k);
+					}
+				}
+				
+			}
 		}
 
 	}
 
-	public void fillMoneroDb() {
-		Long mostRecentBlock = getMostRecentBlockNbr();
-		Long batchSize = 1000L;
-		Long startBatch = (mostRecentBlock / batchSize) + 1;
-		Long endBatch = 1L;
-		
-
-		for (Long l = startBatch; l >= endBatch; l--) {
-
-			Long startIndex = (l - 1L) * batchSize + 1L;
-			Long endIndex = startIndex + batchSize - 1L;
-			endIndex = Math.min(endIndex, mostRecentBlock);
-			ArrayList<Long> blkList = mbRepo.getBlockNumbers(startIndex, endIndex);
-
-			for (Long k = startIndex; k <= endIndex; k++) {
-				if (!blkList.contains(k)) {
-					MoneroBlock blk = getBlock(k);
-					blk.saveOrUpdate();
-					System.out.println("Created Block " + k);
-				}
-			}
-		}
-
+	public Long countMissingBlocks(Long highBlockNbr) {
+		Long count = mbRepo.count();
+		Long high = mbRepo.findHeighestBlockNbr();
+		return high - count;
+	}
+	
+	public boolean isComplete() {
+		return this.countMissingBlocks(mbRepo.findHeighestBlockNbr()).equals(0L);
+	}
+	
+	public boolean isUpdated() {
+		Long mostRecentBlockId = getMostRecentBlockNbr();
+		Long mostRecentBlockDb= mbRepo.findHeighestBlockNbr();
+		return mostRecentBlockId.equals(mostRecentBlockDb);
 	}
 
 }

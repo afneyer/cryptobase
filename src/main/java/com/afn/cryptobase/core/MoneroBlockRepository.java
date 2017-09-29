@@ -38,4 +38,12 @@ public interface MoneroBlockRepository extends AbstractEntityRepository<MoneroBl
 	@Query("SELECT blockNbr from MoneroBlock where blockNbr >= ?1 and blockNbr <= ?2")
 	ArrayList<Long> getBlockNumbers(Long startIndex, Long endIndex);
 
+	@Query("Select max(blockNbr) from MoneroBlock where timestamp < ?1")
+	public Long findMostRecentBlockNbrBefore(Long moneroTimestamp);
+	
+	public default MoneroBlock findMostRecentBlockBefore(Long moneroTimestamp) {
+		Long blockNbr = findMostRecentBlockNbrBefore(moneroTimestamp);
+		return this.findByBlockNbr(blockNbr);
+	}
+
 }

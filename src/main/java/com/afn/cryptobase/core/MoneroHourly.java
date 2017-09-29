@@ -86,13 +86,20 @@ public class MoneroHourly extends AbstractEntity {
 
 	@Override
 	public void save() {
-		getRepo().save(this);
-
+		if (isValid()) {
+			getRepo().save(this);
+		} else {
+			throw new RuntimeException( "Invalid Entity: " + this.toString() );
+		}
 	}
 
 	@Override
 	public void saveOrUpdate() {
-		getRepo().saveOrUpdate(this);
+		if (isValid()) {
+			getRepo().saveOrUpdate(this);
+		} else {
+			throw new RuntimeException( "Invalid Entity: " + this.toString() );
+		}
 	}
 
 	@Override
@@ -121,7 +128,13 @@ public class MoneroHourly extends AbstractEntity {
 	public String toString() {
 		String s = super.toString();
 		s += ", startTimestamp = " + startTimestamp;
+		s += ", startHour = " + getStartHour();
 		return s;
+	}
+
+	private LocalDateTime getStartHour() {
+		// TODO Auto-generated method stub
+		return MoneroHourly.toLocalDateTime(startTimestamp);
 	}
 
 	public Long getDifficulty() {
@@ -181,6 +194,7 @@ public class MoneroHourly extends AbstractEntity {
 		LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSeconds), ZoneId.of("UTC"));
 		return ldt;
 	}
+	
 
 
 }
