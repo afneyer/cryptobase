@@ -10,7 +10,10 @@ import java.net.URL;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MoneroHourlyApi {
 
 	private static String apiEndpoint = "https://min-api.cryptocompare.com/data/histohour";
@@ -19,38 +22,52 @@ public class MoneroHourlyApi {
 	String sTemp = "https://min-api.cryptocompare.com/data/histohour?fsym=XMR&tsym=BTC&limit=60&aggregate=0&toTs=1452680400&extraParams=your_app_name";
 	
 	
-	
-	
+	@Autowired
+	MoneroHourlyRepository mhRepo;
 	
 	/*
 	 * This function assumes that the hourly records are already created
 	 */
-	public static void updateHourlyExchangeRates() {
+	public void updateHourlyExchangeRates() {
 		
-		// update recent ones
 		MoneroHourlyRepository mhRepo = MoneroHourly.getRepoStatic();
-		Long mh = mhRepo.findEarliestRecordTimestamp();
-		Long numDays = 10L;
-		while (mh != null) {
-			updateHourlyExchangeRate("USD", new Long(mh-3600L), numDays );
-			updateHourlyExchangeRate("BTC", new Long(mh-3600L), numDays );
+		Long startTimestamp = mhRepo.findEarliestRecordTimestamp();
+		Long endTimestamp = mhRepo.findLatestRecodTimestamp();
+		Long batchSizeDays = 10L;
+		Long batchSizeSeconds = batchSizeDays*24*3600L;
+		
+		Long timestamp = startTimestamp;
+		
+		while (timestamp + batchSizeSeconds <= endTimestamp) {
+			updateHourlyExchangeRate("USD", timestamp, batchSizeDays );
+			updateHourlyExchangeRate("BTC", timestamp, batchSizeDays );
+			timestamp += batchSizeSeconds;
 		}
+		
+		Long remainingHours = endTimestamp - timestamp + 1L;
+		updateHourlyExchangeRate("USD",timestamp, remainingHours);
+		updateHourlyExchangeRate("BTC",timestamp, remainingHours);
 	}
 	
-	public static void updateHourlyExchangeRate( String currencySymbol, Long startTimestamp, Long numHours ) {
+	public static void updateHourlyExchangeRate( String currencySymbol, Long startTimestamp, Long numDays ) {
 
+		/*
+		 * Note: The API returns hourly values up and including the startTimestamp and endTimestamp
+		 *       For this reason the startTimestamp needs to be increased by the number of hours
+		 */
+		Long periodSeconds = numDays * 24L * 3600L;
+		startTimestamp = startTimestamp + periodSeconds;
+		
 		String timestampString = Long.toString(startTimestamp);
 		
 		String getData = apiGetData.replace("XXX",currencySymbol);
 		getData = getData.replace("YYY",timestampString);
-		getData = getData.replace("ZZZ", new Long(numHours*24L).toString() );
+		getData = getData.replace("ZZZ", new Long(numDays*24L).toString() );
 
 		JSONObject jsn0 = getApiResponseAsJson(apiEndpoint+getData);
-		
 		JSONArray jsnHourlyList;
 		try {
 			jsnHourlyList = (JSONArray) jsn0.get("Data");
-			Long previousTimestamp = 0L;
 			
 			for (int i = 0; i<jsnHourlyList.length()-1 ; i++) {
 				JSONObject record = jsnHourlyList.getJSONObject(i);
@@ -58,14 +75,6 @@ public class MoneroHourlyApi {
 				
 				// get all the info from the record
 				Long timestamp = new Long(record.getLong("time"));
-				if (previousTimestamp == 0L) {
-					previousTimestamp = timestamp - 3600L;
-				}
-				
-				if (timestamp != previousTimestamp + 3600L) {
-					System.out.println("Computing time stamp at " + MoneroBlock.toLocalDateTime(timestamp) + " as average");
-				}
-				previousTimestamp = timestamp;
 				
 				Double high = record.getDouble("high");
 				Double low = record.getDouble("low");
@@ -76,9 +85,11 @@ public class MoneroHourlyApi {
 				
 				MoneroHourlyRepository mhRepo = MoneroHourly.getRepoStatic();
 				MoneroHourly mh = mhRepo.findByStartTimestamp(timestamp);
-				setExchangeRate(mh,currencySymbol,averageRate);
-				
+				setExchangeRate(mh,currencySymbol,averageRate);		
 				mh.saveOrUpdate();
+				
+				timestamp += 3600L;
+				
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -90,10 +101,12 @@ public class MoneroHourlyApi {
 	
 	private static void setExchangeRate(MoneroHourly mh, String currencyCode, Double value) {
 		switch (currencyCode) {
-			case "USD":  mh.setExchangeUSD(value);
-			break;
-			case "BTC":  mh.setExchangeBTC(value);
-			break;
+			case "USD":  
+				mh.setExchangeUSD(value);
+				break;
+			case "BTC":  
+				mh.setExchangeBTC(value);
+				break;
 			default: throw new RuntimeException("Currency " + currencyCode + "is not implemented!");
 		}
 
