@@ -1,5 +1,8 @@
 package com.afn.cryptobase.core;
 
+import java.util.Date;
+import java.util.ArrayList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.Query;
@@ -19,5 +22,8 @@ public interface MoneroHourlyRepository extends AbstractEntityRepository<MoneroH
 
 	@Query("Select max(startTimestamp) From MoneroHourly")
 	Long findLatestRecodTimestamp();
+	
+	@Query("SELECT startTimestamp from MoneroHourly where startTimestamp >= ?1 and startTimestamp < ?2")
+	ArrayList<Long> getHourList(Long startTimestamp, Long endTimestamp);
 
 }

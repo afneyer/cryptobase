@@ -1,6 +1,7 @@
 package com.afn.cryptobase.core;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDateTime;
 
@@ -58,7 +59,7 @@ public class MoneroHourlyManagerTest {
 
 	@Test(expected = RuntimeException.class)
 	public void testInvalidRecordCreation() {
-
+		
 		// verify the an invalid MoneroHourly record does not get created
 		LocalDateTime ldt = MoneroBlock.refBlockDateHour;
 		MoneroHourly mh = new MoneroHourly(ldt.plusSeconds(1572));
@@ -71,5 +72,15 @@ public class MoneroHourlyManagerTest {
 		// new MoneroHourlyManager().fillMoneroHourlyDb();
 		mhMgt.fillMoneroHourlyDb();
 	}
-
+	
+	@Test
+	public void testMissingRecords() {
+		assertEquals(new Long(0), mhMgt.countMissingRecords() );
+	}
+	
+	@Test
+	public void removeInvalidRecords() {
+		mhMgt.removeInvalidRecords();
+		assertTrue( mhMgt.isComplete() );
+	}
 }
