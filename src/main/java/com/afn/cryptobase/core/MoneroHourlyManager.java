@@ -1,6 +1,7 @@
 package com.afn.cryptobase.core;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.afn.realstat.AbstractEntityManager;
 import com.afn.realstat.AfnDateUtil;
+import com.querydsl.core.types.Predicate;
 
 @Component
 public class MoneroHourlyManager extends AbstractEntityManager<MoneroHourly> {
@@ -132,5 +134,20 @@ public class MoneroHourlyManager extends AbstractEntityManager<MoneroHourly> {
 	public void removeInvalidRecords() {
 		ArrayList<MoneroHourly> list = mhRepo.getInvalidRecords();
 		mhRepo.delete(list);
+	}
+
+	public void fillDates() {
+		Predicate p = QMoneroHourly.moneroHourly.startDateTime.isNull();
+		Iterable<MoneroHourly> iterable = mhRepo.findAll(p);
+		
+		Iterator<MoneroHourly> it = iterable.iterator();
+		MoneroHourly mh = null;
+		while ( it.hasNext() ) {
+			mh = it.next();
+			mh.computeDenormalizedFields(MoneroBlock.toLocalDateTime(mh.getStartTimestamp()));
+			mh.saveOrUpdate();
+			System.out.println("Setting startDateTime fields for : " + mh.getStartDateTime());
+		}
+		
 	}
 }

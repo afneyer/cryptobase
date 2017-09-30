@@ -28,10 +28,14 @@ public class MoneroBlock extends AbstractEntity {
 	private static MoneroBlockRepository repo;
 
 	public static Long refBlockNbr = 1398339L;
-	public static Long refBlockTimestamp = 1505324950L;
-	public static Long refBlockMoneySupply = 15078240L;
 	public static LocalDateTime refBlockDateTime = LocalDateTime.parse("2017-09-13T17:49:10");
 	public static LocalDateTime refBlockDateHour = LocalDateTime.parse("2017-09-13T17:00:00");
+	public static LocalDateTime refBlockDateDay = LocalDateTime.parse("2017-09-13T00:00:00");
+	public static Long refBlockTimestamp = MoneroBlock.toMoneroTimestamp(refBlockDateTime);
+	public static Long refBlockHourHourTimestamp = MoneroBlock.toMoneroTimestamp(refBlockDateHour);
+	public static Long refBlockHourHourDaystamp = MoneroBlock.toMoneroTimestamp(refBlockDateDay);
+	public static Long refBlockMoneySupply = 15078240L;
+	
 	public static Long refBlockDifficulty = 31969675874L;
 	public static Long refBlockReward = 6722898519276L;
 	public static final LocalDateTime firstBlockDateTime = LocalDateTime.parse("2014-04-18T10:49:53");

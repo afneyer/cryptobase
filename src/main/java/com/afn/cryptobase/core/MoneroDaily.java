@@ -3,7 +3,6 @@ package com.afn.cryptobase.core;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -14,41 +13,39 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Example;
 
 import com.afn.realstat.AbstractEntity;
-import com.afn.realstat.AfnDateUtil;
 import com.afn.realstat.framework.SpringApplicationContext;
 
 @Entity
-@Table(name = "monero_hourly", uniqueConstraints = @UniqueConstraint(columnNames = { "startTimestamp" }))
+@Table(name = "monero_daily", uniqueConstraints = @UniqueConstraint(columnNames = { "startTimestamp" }))
 /*
  * , indexes = {
  * 
  * @Index(name = "idx_blockDateTime", columnList = "startTimestamp") })
  */
 
-public class MoneroHourly extends AbstractEntity {
+public class MoneroDaily extends AbstractEntity {
 
 	public static final Logger log = LoggerFactory.getLogger("app");
-	private static MoneroHourlyRepository repo;
+	private static MoneroDailyRepository repo;
 
 	private Long startTimestamp; // seconds POSIX time
-	private LocalDateTime startDateTime;
-	private Long firstBlockNbr;
-	private Long lastBlockNbr;
+	private Long firstHourly;
+	private Long lastHourly;
 	private Long difficulty;
+	private Long targetDifficulty;
 	private Long reward;
 	private Double exchangeUSD; // [USD/XMR]
 	private Double exchangeBTC; // [BTC/XMR]
 
-	public MoneroHourly() {
+	public MoneroDaily() {
 	}
 
-	public MoneroHourly(Long startTimestamp) {
+	public MoneroDaily(Long startTimestamp) {
 		this.startTimestamp = startTimestamp;
-		this.startDateTime = MoneroBlock.toLocalDateTime(startTimestamp);
 	}
 
-	public MoneroHourly(LocalDateTime startDateTime) {
-		this(MoneroHourly.toEpochSeconds(startDateTime));
+	public MoneroDaily(LocalDateTime startDateTime) {
+		startTimestamp = MoneroDaily.toEpochSeconds(startDateTime);
 	}
 
 	public Long getStartTimestamp() {
@@ -56,15 +53,17 @@ public class MoneroHourly extends AbstractEntity {
 	}
 	
 	public Long getEndTimestamp() {
-		return (startTimestamp + 3600);
+		return (startTimestamp + 3600*24);
 	}
 	
 	public LocalDateTime getStartDateTime() {
-		return startDateTime;
-	} 
-	
+		LocalDateTime ldt = MoneroHourly.toLocalDateTime(startTimestamp);
+		return ldt;
+	}
+
 	public LocalDateTime getEndDateTime() {
-		return startDateTime.plusHours(1L);
+		LocalDateTime ldt = MoneroHourly.toLocalDateTime(getEndTimestamp());
+		return ldt;
 	}
 
 	public Long getHashRate() {
@@ -72,16 +71,18 @@ public class MoneroHourly extends AbstractEntity {
 		return hashRate;
 	}
 
-	public MoneroHourlyRepository getRepo() {
+	public MoneroDailyRepository getRepo() {
 		if (repo == null) {
-			repo = (MoneroHourlyRepository) SpringApplicationContext.getBean("moneroHourlyRepository");
+			repo = (MoneroDailyRepository) SpringApplicationContext.getBean("moneroDailyRepository");
 		}
 		return repo;
 	}
 	
-	public static MoneroHourlyRepository getRepoStatic() {
+	
+	// TODO: this needs to be investigated
+	public static MoneroDailyRepository getRepoStatic() {
 		if (repo == null) {
-			repo = (MoneroHourlyRepository) SpringApplicationContext.getBean("moneroHourlyRepository");
+			repo = (MoneroDailyRepository) SpringApplicationContext.getBean("moneroDailyRepository");
 		}
 		return repo;
 	}
@@ -105,10 +106,8 @@ public class MoneroHourly extends AbstractEntity {
 	}
 
 	@Override
-	public Example<MoneroHourly> getRefExample() {
-		MoneroHourly mh = new MoneroHourly();
-		mh.startTimestamp = this.startTimestamp;
-		Example<MoneroHourly> e = Example.of(mh);
+	public Example<MoneroDaily> getRefExample() {
+		Example<MoneroDaily> e = Example.of(new MoneroDaily(this.startTimestamp));
 		return e;
 	}
 
@@ -122,10 +121,9 @@ public class MoneroHourly extends AbstractEntity {
 		boolean isValid = false;
 
 		// check whether start time stamp is a valid hour start time stamp
-		if (startTimestamp % 3600 == 0) {
+		if (startTimestamp % 3600*24 == 0) {
 			isValid = true;
 		}
-	
 		return isValid;
 	}
 	
@@ -133,13 +131,12 @@ public class MoneroHourly extends AbstractEntity {
 	public String toString() {
 		String s = super.toString();
 		s += ", startTimestamp = " + startTimestamp;
-		s += ", startHour = " + getStartHour();
+		s += ", startHour = " + getStartDay();
 		return s;
 	}
 
-	private LocalDateTime getStartHour() {
-		// TODO Auto-generated method stub
-		return MoneroHourly.toLocalDateTime(startTimestamp);
+	private LocalDateTime getStartDay() {
+		return MoneroDaily.toLocalDateTime(startTimestamp);
 	}
 
 	public Long getDifficulty() {
@@ -148,6 +145,14 @@ public class MoneroHourly extends AbstractEntity {
 
 	public void setDifficulty(Long difficulty) {
 		this.difficulty = difficulty;
+	}
+
+	public Long getTargetDifficulty() {
+		return targetDifficulty;
+	}
+
+	public void setTargetDifficulty(Long targetDifficulty) {
+		this.targetDifficulty = targetDifficulty;
 	}
 
 	public Long getReward() {
@@ -174,20 +179,20 @@ public class MoneroHourly extends AbstractEntity {
 		this.exchangeBTC = exchangeBTC;
 	}
 
-	public Long getFirstBlockNbr() {
-		return firstBlockNbr;
+	public Long getFirstHourly() {
+		return firstHourly;
 	}
 
-	public void setFirstBlockNbr(Long firstBlockNbr) {
-		this.firstBlockNbr = firstBlockNbr;
+	public void setFirstHourly(Long firstHourly) {
+		this.firstHourly = firstHourly;
 	}
 
-	public Long getLastBlockNbr() {
-		return lastBlockNbr;
+	public Long getLastHourly() {
+		return lastHourly;
 	}
 
-	public void setLastBlockNbr(Long lastBlockNbr) {
-		this.lastBlockNbr = lastBlockNbr;
+	public void setLastHourly(Long lastHourly) {
+		this.lastHourly = lastHourly;
 	}
 
 	public static Long toEpochSeconds(LocalDateTime ldt) {
@@ -199,9 +204,7 @@ public class MoneroHourly extends AbstractEntity {
 		LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSeconds), ZoneId.of("UTC"));
 		return ldt;
 	}
+	
 
-	public void computeDenormalizedFields(LocalDateTime localDateTime) {
-		this.startDateTime = MoneroBlock.toLocalDateTime(startTimestamp);	
-	}
 
 }

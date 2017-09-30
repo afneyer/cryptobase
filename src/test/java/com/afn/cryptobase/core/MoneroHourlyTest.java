@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -42,12 +41,13 @@ public class MoneroHourlyTest {
 		assertEquals(mh.getStartDateTime().plusHours(1), mh.getEndDateTime());
 
 		// update the record
-		mh.setDifficulty(new Long(15));
+		Long difficulty = MoneroBlock.refBlockDifficulty + 1;
+		mh.setDifficulty(difficulty);
 		mh.saveOrUpdate();
 
 		// retrieve the record again and verify field
 		mh = repo.findByStartTimestamp(epochSeconds);
-		assertEquals(new Long(15), mh.getDifficulty());
+		assertEquals(difficulty, mh.getDifficulty());
 
 	}
 
