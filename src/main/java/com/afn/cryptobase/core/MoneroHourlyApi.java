@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,7 +29,7 @@ public class MoneroHourlyApi {
 	/*
 	 * This function assumes that the hourly records are already created
 	 */
-	public void updateHourlyExchangeRates() {
+	public void updateHourlyExchangeRatesForDb() {
 
 		MoneroHourlyRepository mhRepo = MoneroHourly.getRepoStatic();
 		Long startTimestamp = mhRepo.findEarliestRecordTimestamp();
@@ -54,7 +56,20 @@ public class MoneroHourlyApi {
 		}
 	}
 
-	public static void updateHourlyExchangeRate(String currencySymbol, Long startTimestamp, Long numHours) {
+	public void updateHourlyExchangeRate(String currencySymbol, Long startTimestamp, Long numHours) {
+
+		MoneroHourlyRepository mhRepo = MoneroHourly.getRepoStatic();
+		List<MoneroHourly> list = mhRepo.getMoneroHourlyList(startTimestamp, startTimestamp + numHours * 3600L);
+
+		for (Long l = 0L; l < numHours; l++) {
+			updateHourlyExchangeRate("USD", list);
+			updateHourlyExchangeRate("BTC", list);
+		}
+
+	}
+
+	@Deprecated
+	public static void updateHourlyExchangeRateOld(String currencySymbol, Long startTimestamp, Long numHours) {
 
 		/*
 		 * Note: The API returns hourly values up and including the
@@ -166,6 +181,63 @@ public class MoneroHourlyApi {
 		}
 
 		return jsn;
+	}
+
+	public void updateHourlyExchangeRates(MoneroHourly inOutMh) {
+		updateHourlyExchangeRate("USD", inOutMh);
+		updateHourlyExchangeRate("BTC", inOutMh);
+	}
+
+	public void updateHourlyExchangeRate(String currencySymbol, MoneroHourly inOutMh) {
+		ArrayList<MoneroHourly> inOutList = new ArrayList<MoneroHourly>();
+		inOutList.add(inOutMh);
+		updateHourlyExchangeRate(currencySymbol, inOutList);
+	}
+
+	public void updateHourlyExchangeRate(String currencySymbol, List<MoneroHourly> mhList) {
+
+		/*
+		 * Note: The API returns hourly values up and including the
+		 * startTimestamp and endTimestamp For this reason the startTimestamp
+		 * needs to be increased by the number of hours
+		 */
+		Long periodSeconds = 1 * 3600L;
+		Long startTimestamp = mhList.get(0).getStartTimestamp() + periodSeconds;
+
+		String timestampString = startTimestamp.toString();
+
+		String getData = apiGetData.replace("XXX", currencySymbol);
+		getData = getData.replace("YYY", timestampString);
+		getData = getData.replace("ZZZ", new Long(1L).toString());
+
+		JSONObject jsn0 = getApiResponseAsJson(apiEndpoint + getData);
+		JSONArray jsnHourlyList;
+		try {
+			jsnHourlyList = (JSONArray) jsn0.get("Data");
+
+			for (int i = 0; i < jsnHourlyList.length() - 1; i++) {
+				JSONObject record = jsnHourlyList.getJSONObject(i);
+				System.out.println(record);
+
+				// get all the info from the record
+				Long timestamp = new Long(record.getLong("time"));
+
+				Double high = record.getDouble("high");
+				Double low = record.getDouble("low");
+				Double close = record.getDouble("close");
+				Double open = record.getDouble("high");
+
+				Double averageRate = (high + low + close + open) / 4.0;
+
+				setExchangeRate(mhList.get(i), currencySymbol, averageRate);
+
+				timestamp += 3600L;
+
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

@@ -30,6 +30,9 @@ public class MoneroHourlyManager extends AbstractEntityManager<MoneroHourly> {
 
 	@Autowired
 	MoneroBlockApi mbApi;
+	
+	@Autowired
+	MoneroHourlyApi mbhApi;
 
 	/*
 	 * assumes all moneroBlocks are available
@@ -62,6 +65,9 @@ public class MoneroHourlyManager extends AbstractEntityManager<MoneroHourly> {
 			mh.setDifficulty(mh.getDifficulty() / blockList.size());
 		}
 
+		mbhApi.updateHourlyExchangeRate("USD", mh);
+		mbhApi.updateHourlyExchangeRate("BTC", mh);
+		
 		return mh;
 	}
 
@@ -94,7 +100,7 @@ public class MoneroHourlyManager extends AbstractEntityManager<MoneroHourly> {
 			Long endHour = startHour + batchSize * 3600L;
 			endHour = Math.min(endHour, MoneroHourly.toEpochSeconds(latestHour));
 
-			ArrayList<Long> list = mhRepo.getHourList(startHour, endHour);
+			List<Long> list = mhRepo.getTimestampList(startHour, endHour);
 			Long numHours = (endHour - startHour) / 3600L;
 
 			Long timestamp = startHour;
@@ -132,7 +138,7 @@ public class MoneroHourlyManager extends AbstractEntityManager<MoneroHourly> {
 	}
 
 	public void removeInvalidRecords() {
-		ArrayList<MoneroHourly> list = mhRepo.getInvalidRecords();
+		List<MoneroHourly> list = mhRepo.getInvalidRecords();
 		mhRepo.delete(list);
 	}
 
