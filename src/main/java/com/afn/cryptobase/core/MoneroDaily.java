@@ -16,8 +16,8 @@ import com.afn.realstat.AbstractEntity;
 import com.afn.realstat.framework.SpringApplicationContext;
 
 @Entity
-@Table(name = "monero_daily", uniqueConstraints = @UniqueConstraint(columnNames = { "startTimestamp" }))
-/*
+@Table(name = "monero_daily", uniqueConstraints = @UniqueConstraint(columnNames = { "startTime" }))
+/* TODO clean
  * , indexes = {
  * 
  * @Index(name = "idx_blockDateTime", columnList = "startTimestamp") })
@@ -28,9 +28,7 @@ public class MoneroDaily extends AbstractEntity {
 	public static final Logger log = LoggerFactory.getLogger("app");
 	private static MoneroDailyRepository repo;
 
-	private Long startTimestamp; // seconds POSIX time
-	private Long firstHourly;
-	private Long lastHourly;
+	private LocalDateTime startTime; // day starts hour 00:00:00 which is the first hour of the day
 	private Long difficulty;
 	private Long targetDifficulty;
 	private Long reward;
@@ -40,30 +38,16 @@ public class MoneroDaily extends AbstractEntity {
 	public MoneroDaily() {
 	}
 
-	public MoneroDaily(Long startTimestamp) {
-		this.startTimestamp = startTimestamp;
+	public MoneroDaily(LocalDateTime startTime) {
+		this.startTime = startTime;
 	}
 
-	public MoneroDaily(LocalDateTime startDateTime) {
-		startTimestamp = MoneroDaily.toEpochSeconds(startDateTime);
-	}
-
-	public Long getStartTimestamp() {
-		return startTimestamp;
+	public LocalDateTime getStartTime() {
+		return startTime;
 	}
 	
-	public Long getEndTimestamp() {
-		return (startTimestamp + 3600*24);
-	}
-	
-	public LocalDateTime getStartDateTime() {
-		LocalDateTime ldt = MoneroHourly.toLocalDateTime(startTimestamp);
-		return ldt;
-	}
-
-	public LocalDateTime getEndDateTime() {
-		LocalDateTime ldt = MoneroHourly.toLocalDateTime(getEndTimestamp());
-		return ldt;
+	public LocalDateTime getEndTime() {
+		return (startTime.plusDays(1));
 	}
 
 	public Long getHashRate() {
@@ -72,15 +56,6 @@ public class MoneroDaily extends AbstractEntity {
 	}
 
 	public MoneroDailyRepository getRepo() {
-		if (repo == null) {
-			repo = (MoneroDailyRepository) SpringApplicationContext.getBean("moneroDailyRepository");
-		}
-		return repo;
-	}
-	
-	
-	// TODO: this needs to be investigated
-	public static MoneroDailyRepository getRepoStatic() {
 		if (repo == null) {
 			repo = (MoneroDailyRepository) SpringApplicationContext.getBean("moneroDailyRepository");
 		}
@@ -107,7 +82,7 @@ public class MoneroDaily extends AbstractEntity {
 
 	@Override
 	public Example<MoneroDaily> getRefExample() {
-		Example<MoneroDaily> e = Example.of(new MoneroDaily(this.startTimestamp));
+		Example<MoneroDaily> e = Example.of(new MoneroDaily(this.startTime));
 		return e;
 	}
 
@@ -117,26 +92,28 @@ public class MoneroDaily extends AbstractEntity {
 
 	@Override
 	public boolean isValid() {
-
-		boolean isValid = false;
-
-		// check whether start time stamp is a valid hour start time stamp
-		if (startTimestamp % 3600*24 == 0) {
-			isValid = true;
+	
+	    if (startTime.getHour() != 0) {
+	    	return false;
+	    }
+		if (startTime.getMinute() != 0) {
+			return false;
 		}
-		return isValid;
+		if (startTime.getSecond() != 0) {
+			return false;
+		}
+		if (startTime.getNano() != 0) {
+			return false;
+		}
+
+		return true;
 	}
 	
 	@Override
 	public String toString() {
 		String s = super.toString();
-		s += ", startTimestamp = " + startTimestamp;
-		s += ", startHour = " + getStartDay();
+		s += ", startTime = " + startTime;
 		return s;
-	}
-
-	private LocalDateTime getStartDay() {
-		return MoneroDaily.toLocalDateTime(startTimestamp);
 	}
 
 	public Long getDifficulty() {
@@ -179,22 +156,6 @@ public class MoneroDaily extends AbstractEntity {
 		this.exchangeBTC = exchangeBTC;
 	}
 
-	public Long getFirstHourly() {
-		return firstHourly;
-	}
-
-	public void setFirstHourly(Long firstHourly) {
-		this.firstHourly = firstHourly;
-	}
-
-	public Long getLastHourly() {
-		return lastHourly;
-	}
-
-	public void setLastHourly(Long lastHourly) {
-		this.lastHourly = lastHourly;
-	}
-
 	public static Long toEpochSeconds(LocalDateTime ldt) {
 		Long epochSeconds = ldt.atZone(ZoneId.of("UTC")).toEpochSecond();
 		return epochSeconds;
@@ -205,6 +166,4 @@ public class MoneroDaily extends AbstractEntity {
 		return ldt;
 	}
 	
-
-
 }

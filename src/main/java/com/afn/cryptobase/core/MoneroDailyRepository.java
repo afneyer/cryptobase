@@ -1,5 +1,6 @@
 package com.afn.cryptobase.core;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import org.slf4j.Logger;
@@ -14,18 +15,18 @@ public interface MoneroDailyRepository extends AbstractEntityRepository<MoneroDa
 
 	public static final Logger log = LoggerFactory.getLogger("app");
 
-	public MoneroDaily findByStartTimestamp(Long epochSeconds);
+	public MoneroDaily findByStartTime(LocalDateTime startTime);
 	
-	@Query("SELECT min(startTimestamp) FROM  MoneroDaily")
-	Long findEarliestRecordTimestamp();
+	@Query("SELECT min(startTime) FROM  MoneroDaily")
+	Long findEarliestRecordDate();
 
-	@Query("Select max(startTimestamp) From MoneroDaily")
-	Long findLatestRecodTimestamp();
+	@Query("Select max(startTime) From MoneroDaily")
+	Long findLatestRecodDate();
 	
-	@Query("SELECT startTimestamp from MoneroHourly where startTimestamp >= ?1 and startTimestamp < ?2")
+	@Query("SELECT startTime from MoneroDaily where startTime >= ?1 and startTime < ?2")
 	ArrayList<Long> getDayList(Long startTimestamp, Long endTimestamp);
 	
-	@Query("select md from MoneroDaily md where mod(md.startTimestamp,24*3600) != 0")
-	ArrayList<MoneroHourly> getInvalidRecords();
+	@Query("select md from MoneroDaily md where mod(md.startTime,24*3600) != 0")
+	ArrayList<MoneroDaily> getInvalidRecords();
 
 }

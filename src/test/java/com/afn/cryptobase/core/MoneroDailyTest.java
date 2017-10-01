@@ -19,35 +19,32 @@ import com.afn.Application;
 @ActiveProfiles("dev")
 @WebAppConfiguration
 public class MoneroDailyTest {
+	
+	@Autowired
+	MoneroDailyRepository mdRepo;
 
 	@Test
 	public void testMoneroDailyCreation() {
 
 		// verify the MoneroHourly record gets created correctly
 		LocalDateTime ldt = MoneroBlock.refBlockDateDay;
-		MoneroDaily mh = new MoneroDaily(MoneroBlock.refBlockHourHourDaystamp);
-		mh.saveOrUpdate();
+		MoneroDaily md = new MoneroDaily(ldt);
+		md.saveOrUpdate();
 
 		// retrieve the record again
-		Long epochSeconds = MoneroHourly.toEpochSeconds(ldt);
-		MoneroDailyRepository repo = MoneroDaily.getRepoStatic();
-		mh = repo.findByStartTimestamp(epochSeconds);
+		md = mdRepo.findByStartTime(ldt);
 
 		// verify time stamps
-		assertEquals(epochSeconds, mh.getStartTimestamp());
-		assertEquals(new Long(epochSeconds + 3600*24), mh.getEndTimestamp());
-
-		// verify dates and times
-		assertEquals(MoneroHourly.toLocalDateTime(epochSeconds), mh.getStartDateTime());
-		assertEquals(mh.getStartDateTime().plusHours(24), mh.getEndDateTime());
+		assertEquals(MoneroBlock.refBlockDateDay, md.getStartTime());
+		assertEquals(MoneroBlock.refBlockDateDay.plusDays(1), md.getEndTime());
 
 		// update the record
-		mh.setDifficulty(MoneroBlock.refBlockDifficulty+1);
-		mh.saveOrUpdate();
+		md.setDifficulty(MoneroBlock.refBlockDifficulty+1);
+		md.saveOrUpdate();
 
 		// retrieve the record again and verify field
-		mh = repo.findByStartTimestamp(epochSeconds);
-		assertEquals(new Long(MoneroBlock.refBlockDifficulty+1), mh.getDifficulty());
+		md = mdRepo.findByStartTime(MoneroBlock.refBlockDateDay);
+		assertEquals(new Long(MoneroBlock.refBlockDifficulty+1), md.getDifficulty());
 
 	}
 
@@ -56,7 +53,7 @@ public class MoneroDailyTest {
 
 		// verify the an invalid MoneroHourly record does not get created
 		LocalDateTime ldt = MoneroBlock.refBlockDateHour;
-		MoneroHourly mh = new MoneroHourly(ldt.plusSeconds(1572));
+		MoneroHourly mh = new MoneroHourly(ldt.plusSeconds(5572));
 		mh.saveOrUpdate();
 
 	}
