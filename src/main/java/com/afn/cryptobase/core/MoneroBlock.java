@@ -218,5 +218,13 @@ public class MoneroBlock extends AbstractEntity {
 		return ldt;
 	}
 
+	// TODO find better way and move
+	public static LocalDateTime roundDownToDay(LocalDateTime ldt) {
+		ldt = ldt.minusSeconds(ldt.getSecond());
+		ldt = ldt.minusMinutes(ldt.getMinute());
+		ldt = ldt.minusNanos(ldt.getNano());
+		ldt = ldt.minusHours(ldt.getHour());
+		return ldt;
+	}
 
 }

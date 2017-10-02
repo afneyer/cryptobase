@@ -15,18 +15,18 @@ public interface MoneroDailyRepository extends AbstractEntityRepository<MoneroDa
 
 	public static final Logger log = LoggerFactory.getLogger("app");
 
-	public MoneroDaily findByStartTime(LocalDateTime startTime);
+	public MoneroDaily findByStartDayTime(LocalDateTime startDayTime);
 	
-	@Query("SELECT min(startTime) FROM  MoneroDaily")
-	Long findEarliestRecordDate();
+	@Query("SELECT min(startDayTime) FROM  MoneroDaily")
+	LocalDateTime findEarliestRecordDate();
 
-	@Query("Select max(startTime) From MoneroDaily")
-	Long findLatestRecodDate();
+	@Query("Select max(startDayTime) From MoneroDaily")
+	LocalDateTime findLatestRecodDate();
 	
-	@Query("SELECT startTime from MoneroDaily where startTime >= ?1 and startTime < ?2")
-	ArrayList<Long> getDayList(Long startTimestamp, Long endTimestamp);
+	@Query("SELECT startDayTime from MoneroDaily where startDayTime >= ?1 and startDayTime < ?2")
+	ArrayList<LocalDateTime> getDayList(LocalDateTime startDayTime, LocalDateTime endDayTime);
 	
-	@Query("select md from MoneroDaily md where mod(md.startTime,24*3600) != 0")
+	@Query("select md from MoneroDaily md where mod(md.startDayTime,24*3600) != 0")
 	ArrayList<MoneroDaily> getInvalidRecords();
 
 }

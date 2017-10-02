@@ -32,18 +32,18 @@ public class MoneroDailyTest {
 		md.saveOrUpdate();
 
 		// retrieve the record again
-		md = mdRepo.findByStartTime(ldt);
+		md = mdRepo.findByStartDayTime(ldt);
 
 		// verify time stamps
-		assertEquals(MoneroBlock.refBlockDateDay, md.getStartTime());
-		assertEquals(MoneroBlock.refBlockDateDay.plusDays(1), md.getEndTime());
+		assertEquals(MoneroBlock.refBlockDateDay, md.getStartDayTime());
+		assertEquals(MoneroBlock.refBlockDateDay.plusDays(1), md.getEndDayTime());
 
 		// update the record
 		md.setDifficulty(MoneroBlock.refBlockDifficulty+1);
 		md.saveOrUpdate();
 
 		// retrieve the record again and verify field
-		md = mdRepo.findByStartTime(MoneroBlock.refBlockDateDay);
+		md = mdRepo.findByStartDayTime(MoneroBlock.refBlockDateDay);
 		assertEquals(new Long(MoneroBlock.refBlockDifficulty+1), md.getDifficulty());
 
 	}

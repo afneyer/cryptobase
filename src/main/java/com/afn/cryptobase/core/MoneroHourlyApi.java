@@ -32,26 +32,16 @@ public class MoneroHourlyApi {
 	public void updateHourlyExchangeRatesForDb() {
 
 		MoneroHourlyRepository mhRepo = MoneroHourly.getRepoStatic();
-		Long startTimestamp = mhRepo.findEarliestRecordTimestamp();
-		Long endTimestamp = mhRepo.findLatestRecodTimestamp();
-		Long batchSizeHours = 10L;
-		Long batchSizeSeconds = batchSizeHours * 3600L;
+		Long timestamp = mhRepo.findEarliestIncompleteRecord();
+		MoneroHourly mh = mhRepo.findByStartTimestamp(timestamp);
 
-		Long timestamp = startTimestamp;
-
-		timestamp = mhRepo.findEarliestIncompleteRecord();
-
-		if (timestamp != null) {
-
-			while (timestamp + batchSizeSeconds <= endTimestamp) {
-				updateHourlyExchangeRate("USD", timestamp, batchSizeHours);
-				updateHourlyExchangeRate("BTC", timestamp, batchSizeHours);
-				timestamp += batchSizeSeconds;
-			}
-
-			Long remainingHours = ((endTimestamp - timestamp) / 3600) + 1;
-			updateHourlyExchangeRate("USD", timestamp, remainingHours);
-			updateHourlyExchangeRate("BTC", timestamp, remainingHours);
+		while (timestamp != null) {
+			
+			updateHourlyExchangeRates(mh);
+			mh.saveOrUpdate();
+			
+			timestamp = mhRepo.findEarliestIncompleteRecord();
+			mh = mhRepo.findByStartTimestamp(timestamp);
 
 		}
 	}
@@ -61,9 +51,10 @@ public class MoneroHourlyApi {
 		MoneroHourlyRepository mhRepo = MoneroHourly.getRepoStatic();
 		List<MoneroHourly> list = mhRepo.getMoneroHourlyList(startTimestamp, startTimestamp + numHours * 3600L);
 
-		for (Long l = 0L; l < numHours; l++) {
+		for (int l = 0; l < numHours; l++) {
 			updateHourlyExchangeRate("USD", list);
 			updateHourlyExchangeRate("BTC", list);
+			list.get(l).saveOrUpdate();
 		}
 
 	}

@@ -3,9 +3,7 @@ package com.afn.cryptobase.core;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,49 +14,42 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import com.afn.Application;
-import com.afn.realstat.AfnDateUtil;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 @ActiveProfiles("dev")
 @WebAppConfiguration
-public class MoneroHourlyManagerTest {
+public class MoneroDailyManagerTest {
 
 	@Autowired
-	MoneroHourlyRepository mhRepo;
+	MoneroDailyRepository mdRepo;
 	
 	@Autowired
-	MoneroHourlyManager mhMgt;
+	MoneroDailyManager mdMgr;
 
 	@Test
-	public void testMoneroHourlyCreation() {
+	public void testMoneroDailyCreation() {
 
 		// verify the MoneroHourly record gets created correctly
-		LocalDateTime ldt = MoneroBlock.refBlockDateHour;
-		MoneroHourly mh = mhMgt.createMoneroHourly(ldt);
-		mh.saveOrUpdate();
+		LocalDateTime ldt = MoneroBlock.refBlockDateDay;
+		MoneroDaily md = new MoneroDaily(ldt);
+		md.saveOrUpdate();
 
 		// retrieve the record again
-		Long epochSeconds = MoneroHourly.toEpochSeconds(ldt);
-		mh = mhRepo.findByStartTimestamp(epochSeconds);
+		md = mdRepo.findByStartDayTime(ldt);
 
-		// verify time stamps
-		assertEquals(epochSeconds, mh.getStartTimestamp());
-		assertEquals(new Long(epochSeconds + 3600), mh.getEndTimestamp());
-		assertEquals(mh.getStartDateTime(), MoneroBlock.toLocalDateTime(mh.getStartTimestamp()));
-
-		// verify dates and times
-		assertEquals(MoneroHourly.toLocalDateTime(epochSeconds), mh.getStartDateTime());
-		assertEquals(mh.getStartDateTime().plusHours(1), mh.getEndDateTime());
+		// verify date and times
+		assertEquals(ldt, md.getStartDayTime());
+		assertEquals(ldt.plusDays(1), md.getEndDayTime());
 
 		// update the record
-		Long difficulty = MoneroBlock.refBlockDifficulty+1L;
-		mh.setDifficulty(difficulty);
-		mh.saveOrUpdate();
+		Long difficulty = MoneroBlock.refBlockDifficulty + 1L;
+		md.setDifficulty(difficulty);
+		md.saveOrUpdate();
 
 		// retrieve the record again and verify field
-		mh = mhRepo.findByStartTimestamp(epochSeconds);
-		assertEquals(difficulty, mh.getDifficulty());
+		md = mdRepo.findByStartDayTime(ldt);
+		assertEquals(difficulty, md.getDifficulty());
 
 	}
 
@@ -73,24 +64,20 @@ public class MoneroHourlyManagerTest {
 	}
 	
 	@Test
-	public void fillMoneroHourlyDb() {
+	public void fillMoneroDailyDb() {
 		// new MoneroHourlyManager().fillMoneroHourlyDb();
-		mhMgt.fillMoneroHourlyDb();
+		mdMgr.fillMoneroDailyDb();
 	}
 	
 	@Test
 	public void testMissingRecords() {
-		assertEquals(new Long(0), mhMgt.countMissingRecords() );
+		assertEquals(new Long(0), mdMgr.countMissingRecords() );
 	}
 	
 	@Test
 	public void testRemoveInvalidRecords() {
-		mhMgt.removeInvalidRecords();
-		assertTrue( mhMgt.isComplete() );
+		mdMgr.removeInvalidRecords();
+		assertTrue( mdMgr.isComplete() );
 	}
 	
-	@Test
-	public void fillDate() {
-		mhMgt.fillDates();
-	}
 }

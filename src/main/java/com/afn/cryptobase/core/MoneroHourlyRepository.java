@@ -1,5 +1,6 @@
 package com.afn.cryptobase.core;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,5 +36,8 @@ public interface MoneroHourlyRepository extends AbstractEntityRepository<MoneroH
 
 	@Query("select min(startTimestamp) from MoneroHourly where exchangeUSD is null or exchangeBTC is null")
 	public Long findEarliestIncompleteRecord();
+	
+	@Query("SELECT mh from MoneroHourly mh where mh.startDateTime >= ?1 and mh.startDateTime < ?2")
+	public List<MoneroHourly> getMoneroHourlyList(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
 }
