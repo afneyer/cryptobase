@@ -16,7 +16,7 @@ import com.afn.realstat.AbstractEntity;
 import com.afn.realstat.framework.SpringApplicationContext;
 
 @Entity
-@Table(name = "contract", uniqueConstraints = @UniqueConstraint(columnNames = { "uniqueName" }))
+@Table(name = "contract", uniqueConstraints = @UniqueConstraint(columnNames = { "company","startDateTime" }))
 
 public class Contract extends AbstractEntity {
 
@@ -24,7 +24,7 @@ public class Contract extends AbstractEntity {
 
 	private static ContractRepository repo;
 
-	private String uniqueName;
+
 	private String company;
 	private LocalDateTime startDateTime;
 	private Long duration; // duration in seconds
@@ -32,19 +32,19 @@ public class Contract extends AbstractEntity {
 	private String algorithm;
 	private String revenueCurrency;
 	private String type;
-	private Long price;
+	private Double price;
 	private String priceCurrency;
 
 	public Contract() {
 	}
 
-	public Contract(String uniqueName) {
-		uniqueName = this.uniqueName;
+	public Contract(String company, LocalDateTime startDateTime) {
+		this.company = company;
+		this.startDateTime = startDateTime;
 	}
 
-	public Contract(String uniqueName, String company, LocalDateTime startDateTime, Long duration, Long hashRate,
-			String algorithm, String revenueCurrency, String type, Long price, String priceCurrency) {
-		this.uniqueName = uniqueName;
+	public Contract(String company, LocalDateTime startDateTime, Long duration, Long hashRate,
+			String algorithm, String revenueCurrency, String type, Double price, String priceCurrency) {
 		this.company = company;
 		this.startDateTime = startDateTime;
 		this.duration = duration;
@@ -59,7 +59,7 @@ public class Contract extends AbstractEntity {
 
 	public ContractRepository getRepo() {
 		if (repo == null) {
-			repo = (ContractRepository) SpringApplicationContext.getBean("moneroContractRepository");
+			repo = (ContractRepository) SpringApplicationContext.getBean("contractRepository");
 		}
 		return repo;
 	}
@@ -84,7 +84,7 @@ public class Contract extends AbstractEntity {
 
 	@Override
 	public Example<Contract> getRefExample() {
-		Example<Contract> e = Example.of(new Contract(this.uniqueName));
+		Example<Contract> e = Example.of(new Contract(this.company, this.startDateTime));
 		return e;
 	}
 
@@ -101,8 +101,6 @@ public class Contract extends AbstractEntity {
 		List<String> typeList = Arrays.asList("Monero");
 
 		if (!companyList.contains(company))
-			return false;
-		if (uniqueName == null)
 			return false;
 		if (startDateTime == null)
 			return false;
@@ -126,17 +124,13 @@ public class Contract extends AbstractEntity {
 	@Override
 	public String toString() {
 		String s = super.toString();
-		s += ", uniqueName = " + uniqueName;
+		s += ", company = " + company;
 		s += ", startDateTime " + startDateTime;
 		return s;
 	}
 
 	public String getAlgorithm() {
 		return algorithm;
-	}
-
-	public String getUniqueName() {
-		return uniqueName;
 	}
 
 	public String getCompany() {
@@ -163,7 +157,7 @@ public class Contract extends AbstractEntity {
 		return type;
 	}
 
-	public Long getPrice() {
+	public Double getPrice() {
 		return price;
 	}
 

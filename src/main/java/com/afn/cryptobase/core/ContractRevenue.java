@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -24,9 +26,10 @@ public class ContractRevenue extends AbstractEntity {
 
 	private static ContractRevenueRepository repo;
 
+	@ManyToOne(fetch = FetchType.EAGER)
 	private Contract contract;
 	private LocalDateTime startDateTime;
-	private Long interval; // duration in seconds
+	private Long revenueInterval; // duration in seconds
 	private Double revenue;
 	private String revenueCurrency;
 
@@ -40,7 +43,7 @@ public class ContractRevenue extends AbstractEntity {
 
 	public ContractRevenue(Contract contract, LocalDateTime startDateTime, Long interval, Double revenue,String revenueCurrrency) {
 		this(contract, startDateTime);
-		this.interval = interval; // duration in seconds
+		this.revenueInterval = interval; // duration in seconds
 		this.revenue = revenue;
 		this.revenueCurrency = revenueCurrrency;
 	}
@@ -90,8 +93,8 @@ public class ContractRevenue extends AbstractEntity {
 		if (startDateTime.isBefore(contract.getStartDateTime())) return false;
 		
 		
-		if (interval == null) return false;
-		if (interval <= 0) return false;
+		if (revenueInterval == null) return false;
+		if (revenueInterval <= 0) return false;
 		if (revenue == null) return false;
 		if (revenue < 0.0) return false;
 		
