@@ -29,7 +29,6 @@ public class ContractRevenue extends AbstractEntity {
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Contract contract;
 	private LocalDateTime startDateTime;
-	private Long revenueInterval; // duration in seconds
 	private Double revenue;
 	private String revenueCurrency;
 
@@ -41,9 +40,8 @@ public class ContractRevenue extends AbstractEntity {
 		this.startDateTime = startDateTime;
 	}
 
-	public ContractRevenue(Contract contract, LocalDateTime startDateTime, Long interval, Double revenue,String revenueCurrrency) {
+	public ContractRevenue(Contract contract, LocalDateTime startDateTime, Double revenue,String revenueCurrrency) {
 		this(contract, startDateTime);
-		this.revenueInterval = interval; // duration in seconds
 		this.revenue = revenue;
 		this.revenueCurrency = revenueCurrrency;
 	}
@@ -90,16 +88,32 @@ public class ContractRevenue extends AbstractEntity {
 
 		if (contract == null) return false;
 		if (startDateTime == null) return false;
-		if (startDateTime.isBefore(contract.getStartDateTime())) return false;
-		
-		
-		if (revenueInterval == null) return false;
-		if (revenueInterval <= 0) return false;
+		if (startDateTime.isBefore(MoneroBlock.roundDownToDay(contract.getStartDateTime()))) return false;
 		if (revenue == null) return false;
 		if (revenue < 0.0) return false;
 		
 		if (!currencyList.contains(revenueCurrency)) return false;
 		return true;
+	}
+
+	public static Logger getLog() {
+		return log;
+	}
+
+	public Contract getContract() {
+		return contract;
+	}
+
+	public LocalDateTime getStartDateTime() {
+		return startDateTime;
+	}
+
+	public Double getRevenue() {
+		return revenue;
+	}
+
+	public String getRevenueCurrency() {
+		return revenueCurrency;
 	}
 
 	@Override

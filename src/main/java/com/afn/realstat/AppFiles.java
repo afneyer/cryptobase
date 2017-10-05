@@ -39,7 +39,7 @@ public class AppFiles {
 	}
 	
 	public static String getDataDir() {
-		return validateDir(userDir + "data");
+		return validateDir(userDir + "\\data");
 	}
 	
 	private static String validateDir(String filePath) {

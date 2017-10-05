@@ -1,0 +1,38 @@
+Genesis,2017-08-26T08:09:26,31536000,200,CryptoNight,XMR,Monero,166.60,USD
+cryptonight XMR balance of 0.003856 added to your account on 2017-09-26T12:00:00+00:00
+cryptonight XMR balance of 0.00365184 added to your account on 2017-09-25T12:00:00+00:00
+cryptonight XMR balance of 0.00357378 added to your account on 2017-09-24T12:00:00+00:00
+cryptonight XMR balance of 0.00367148 added to your account on 2017-09-23T12:00:00+00:00
+cryptonight XMR balance of 0.00361128 added to your account on 2017-09-22T12:00:00+00:00
+cryptonight XMR balance of 0.00365028 added to your account on 2017-09-21T12:00:00+00:00
+cryptonight XMR balance of 0.00376566 added to your account on 2017-09-20T12:00:00+00:00
+cryptonight XMR balance of 0.00391728 added to your account on 2017-09-19T12:00:00+00:00
+cryptonight XMR balance of 0.003548 added to your account on 2017-09-18T12:00:00+00:00
+cryptonight XMR balance of 0.00369792 added to your account on 2017-09-17T12:00:00+00:00
+cryptonight XMR balance of 0.00355464 added to your account on 2017-09-16T12:00:00+00:00
+cryptonight XMR balance of 0.00348158 added to your account on 2017-09-15T12:00:00+00:00
+cryptonight XMR balance of 0.00378686 added to your account on 2017-09-14T12:00:00+00:00
+cryptonight XMR balance of 0.00368592 added to your account on 2017-09-13T12:00:00+00:00
+cryptonight XMR balance of 0.00358292 added to your account on 2017-09-12T12:00:00+00:00
+cryptonight XMR balance of 0.00373198 added to your account on 2017-09-11T12:00:00+00:00
+cryptonight XMR balance of 0.003643 added to your account on 2017-09-10T12:00:00+00:00
+cryptonight XMR balance of 0.00346046 added to your account on 2017-09-09T12:00:00+00:00
+cryptonight XMR balance of 0.00384804 added to your account on 2017-09-08T12:00:00+00:00
+cryptonight XMR balance of 0.00412052 added to your account on 2017-09-07T12:00:00+00:00
+cryptonight XMR balance of 0.00416756 added to your account on 2017-09-06T12:00:00+00:00
+cryptonight XMR balance of 0.00427806 added to your account on 2017-09-05T12:00:00+00:00
+cryptonight XMR balance of 0.00428694 added to your account on 2017-09-04T12:00:00+00:00
+cryptonight XMR balance of 0.00402342 added to your account on 2017-09-03T12:00:00+00:00
+cryptonight XMR balance of 0.00414036 added to your account on 2017-09-02T12:00:00+00:00
+cryptonight XMR balance of 0.00458204 added to your account on 2017-09-01T12:00:00+00:00
+cryptonight XMR balance of 0.0045077 added to your account on 2017-08-31T12:00:00+00:00
+cryptonight XMR balance of 0.00406726 added to your account on 2017-08-30T12:00:00+00:00
+cryptonight XMR balance of 0.00428782 added to your account on 2017-08-29T12:00:00+00:00
+cryptonight XMR balance of 0.0043304 added to your account on 2017-08-28T12:00:00+00:00
+cryptonight XMR balance of 0.00509174 added to your account on 2017-08-27T12:00:00+00:00
+01.10.2017  	XMR  	0.00381646 i	 	
+30.09.2017  	XMR  	0.00348400 i	 	
+29.09.2017  	XMR  	0.00343400 i	 	
+28.09.2017  	XMR  	0.00344000 i	 	
+27.09.2017  	XMR  	0.00371400 i	 	
+26.09.2017  	XMR  	0.00377020 i		
