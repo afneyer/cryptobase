@@ -35,6 +35,8 @@ public class MoneroBlock extends AbstractEntity {
 	public static Long refBlockHourHourTimestamp = MoneroBlock.toMoneroTimestamp(refBlockDateHour);
 	public static Long refBlockHourHourDaystamp = MoneroBlock.toMoneroTimestamp(refBlockDateDay);
 	public static Long refBlockMoneySupply = 15078240L;
+	public static Object refNonce = 2108L;
+	public static Object refHash = "5ce67febefeda5b7359bb7afda093154eb1b5f2bdc9bfe81d42e359aa621880e";
 	
 	public static Long refBlockDifficulty = 31969675874L;
 	public static Long refBlockReward = 6722898519276L;
@@ -42,10 +44,13 @@ public class MoneroBlock extends AbstractEntity {
 	public static final LocalDateTime firstBlockHour = LocalDateTime.parse("2014-04-18T10:00:00");
 
 	private static Long blockTime = 120L; // Target block creation time in seconds
+	
 
 	private Long blockNbr;
 	private Long size;
 	private Long difficulty;
+	private Long nonce;
+	private String hash;
 	private boolean orphanStatus;
 	private Long reward; // Block reward in mXmr
 	private Long timestamp; // time stamp in seconds since ?
@@ -197,6 +202,22 @@ public class MoneroBlock extends AbstractEntity {
 	public LocalDate getBlockDate() {
 		LocalDate ld = AfnDateUtil.asLocalDate(blockDateTime);
 		return ld;
+	}
+
+	public Long getNonce() {
+		return nonce;
+	}
+
+	public void setNonce(Long nonce) {
+		this.nonce = nonce;
+	}
+
+	public String getHash() {
+		return hash;
+	}
+
+	public void setHash(String hash) {
+		this.hash = hash;
 	}
 
 	public static Long toMoneroTimestamp(LocalDateTime ldt) {

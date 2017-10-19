@@ -46,4 +46,7 @@ public interface MoneroBlockRepository extends AbstractEntityRepository<MoneroBl
 		return this.findByBlockNbr(blockNbr);
 	}
 
+	@Query("select max(blockNbr) from MoneroBlock where nonce is null")
+	public Long getMostRecentBlockNbrWithoutNonce();
+
 }

@@ -39,6 +39,8 @@ public class MoneroBlockApi {
 			blk.setOrphanStatus(jsn1.getBoolean("orphan_status"));
 			blk.setReward(jsn1.getLong("reward"));
 			blk.setSize(jsn1.getLong("block_size"));
+			blk.setNonce(jsn1.getLong("nonce"));
+			blk.setHash(jsn1.getString("hash"));
 			blk.setStatus(jsn0.getString("status"));
 		} catch (JSONException e) {
 			throw new RuntimeException("Cannot find field in MoneroBlockApi " + jsn0.toString() + e);
@@ -113,6 +115,15 @@ public class MoneroBlockApi {
 		Long startBlockNbr = MoneroBlock.refBlockNbr;
 		Long endBlockNbr = 1L;
 		fillMoneroDb(startBlockNbr, endBlockNbr);
+	}
+	
+	public void updateNonceAndHash() {
+		Long startBlockNbr = mbRepo.getMostRecentBlockNbrWithoutNonce();
+		Long endBlockNbr = 1L;
+		for (Long l = startBlockNbr; l>= endBlockNbr; l-- ) {
+			MoneroBlock blk = this.getBlock(l);
+			blk.saveOrUpdate();
+		}
 	}
 
 	public Long getMostRecentBlockNbr() {

@@ -39,6 +39,8 @@ public class MoneroBlockApiTest {
 		assertEquals(blk.getHashRate(), new Long(MoneroBlock.refBlockDifficulty / MoneroBlock.getBlockTime()));
 		assertEquals(blk.getBlockDate(), MoneroBlock.refBlockDateTime.toLocalDate());
 		assertEquals(blk.getReward(), MoneroBlock.refBlockReward);
+		assertEquals(blk.getNonce(), MoneroBlock.refNonce);
+		assertEquals(blk.getHash(), MoneroBlock.refHash);
 	}
 
 	@Test
@@ -56,6 +58,11 @@ public class MoneroBlockApiTest {
 	@Test
 	public void testFillMoneroDb() {
 		mbApi.fillMoneroDb();
+	}
+	
+	@Test
+	public void testUpdateNonceAndHash() {
+		mbApi.updateNonceAndHash();;
 	}
 
 	@Test
