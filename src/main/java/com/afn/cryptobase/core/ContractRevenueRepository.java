@@ -2,6 +2,7 @@ package com.afn.cryptobase.core;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,8 @@ public interface ContractRevenueRepository extends AbstractEntityRepository<Cont
 
 	// TODO fix
 	public ContractRevenue findByContractAndStartDateTime(Contract contract, LocalDateTime startDateTime);
+
+	public List<ContractRevenue> findByContract(Contract contract);
 
 	/*
 	@Query("SELECT min(startDateTime) FROM  MoneroDaily")

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MoneroBlockApi {
 
-	private static String ApiEndpoint = "http://moneroblocks.info/api/";
+	private static String ApiEndpoint = "https://moneroblocks.info/api/";
 	private static String ApiGetBlockData = "get_block_header/";
 
 	@Autowired

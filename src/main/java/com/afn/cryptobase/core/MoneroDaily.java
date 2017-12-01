@@ -134,6 +134,10 @@ public class MoneroDaily extends AbstractEntity {
 	public Long getReward() {
 		return reward;
 	}
+	
+	public Double getRewardXmr() {
+		return new Double(reward) / new Double("1e12");
+	}
 
 	public void setReward(Long reward) {
 		this.reward = reward;
