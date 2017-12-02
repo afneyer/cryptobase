@@ -124,5 +124,30 @@ public class MoneroBlockManagerTest {
 		
 		np.printBitStats(np.computeBitStats(),file);
 	}
-
+	
+	@Test 
+	public void lastNumBitStats() {
+		Long firstBlock = 1L;
+		Long lastBlock = mbRepo.findHeighestBlockNbr();
+		List<Long> nonces = mbRepo.getNonces(firstBlock, lastBlock);
+		
+		NumberPattern np = new NumberPattern( nonces );
+		String fileName = "MoneroLastNumBitStats.txt";	
+		File file = new File( AppFiles.getTestOutputDir() + "\\" + fileName);
+		
+		np.printBitStats(np.computeBitStats(),file);
+	}
+	
+	@Test 
+	public void printFactorStats() {
+		Long firstBlock = 1L;
+		Long lastBlock = mbRepo.findHeighestBlockNbr();
+		List<Long> nonces = mbRepo.getNonces(firstBlock, lastBlock);
+		
+		NumberPattern np = new NumberPattern( nonces );
+		String fileName = "MoneroNonceFactorStats.csv";	
+		File file = new File( AppFiles.getTestOutputDir() + "\\" + fileName);
+		
+		np.printFactorStats(file);
+	}
 }

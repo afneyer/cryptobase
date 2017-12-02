@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.math3.primes.Primes;
 import org.hsqldb.NumberSequence;
 
 public class NumberPattern {
@@ -68,9 +69,9 @@ public class NumberPattern {
 	public BufferedImage drawPattern() {
 
 		double scaleFactor = 0.5;
-		
+
 		List<Long> seq = getScaledSequence(scaleFactor);
-		
+
 		BufferedImage im = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
 		// initialize image
@@ -90,11 +91,10 @@ public class NumberPattern {
 		Font font = new Font(null, Font.BOLD, 14);
 		g.setFont(font);
 		g.setColor(Color.GREEN);
-		String info = "Pattern Size " + scaleFactor*width + " x " + scaleFactor*height;
-		g.drawString(info,700,200);
-		
-		BasicStroke line =
-		        new BasicStroke(1.0f);
+		String info = "Pattern Size " + scaleFactor * width + " x " + scaleFactor * height;
+		g.drawString(info, 700, 200);
+
+		BasicStroke line = new BasicStroke(1.0f);
 		g.setStroke(line);
 		g.drawRect(0, 0, 1023, 1023);
 		g.dispose();
@@ -102,32 +102,33 @@ public class NumberPattern {
 		return im;
 
 	}
-	
-	public HashMap<Long,Long> computeNormalizedNonceDistribution() {
-		
-		Long factor = Math.round(Math.pow(2.0,10.0));
-		
+
+	public HashMap<Long, Long> computeNormalizedNonceDistribution() {
+
+		Long factor = Math.round(Math.pow(2.0, 10.0));
+
 		// compute distribution (key=nonce, value=count)
-		HashMap<Long,Long> dist = new HashMap<Long,Long>();
+		HashMap<Long, Long> dist = new HashMap<Long, Long>();
 		Long maxCount = 0L;
 		for (Long ele : sequence) {
-			
+
 			Long key = ele;
 			while (key > factor) {
 				key = key / factor;
-			};
+			}
+			;
 			Long count = dist.get(key);
 			if (count == null) {
 				count = 1L;
 			} else {
 				count++;
 			}
-			dist.put(key,  count++);
+			dist.put(key, count++);
 			maxCount = Math.max(maxCount, count);
 		}
 
 		return dist;
-	}	
+	}
 
 	private List<Long> getScaledSequence(double factor) {
 
@@ -148,7 +149,7 @@ public class NumberPattern {
 		return seq;
 
 	}
-	
+
 	public Long getMaxValue() {
 		long maxValue = 0;
 		int length = sequence.size();
@@ -159,14 +160,15 @@ public class NumberPattern {
 	}
 
 	private void addPoint(BufferedImage im, int x, int y) {
-		
-		if (x > width-1) return;
-		if (y > height-1) return;
+
+		if (x > width - 1)
+			return;
+		if (y > height - 1)
+			return;
 		int col = 0;
 		try {
 			col = im.getRGB(x, y);
-		}
-		catch (ArrayIndexOutOfBoundsException e) {
+		} catch (ArrayIndexOutOfBoundsException e) {
 			System.out.println(" x = " + x + "    y=" + y);
 			throw new RuntimeException(e);
 		}
@@ -200,44 +202,110 @@ public class NumberPattern {
 		int b = level;
 		return new Color(r, g, b);
 	}
-	
+
 	public static Boolean getBit(int pos, Long l) {
 		return ((l & (1L << pos)) != 0);
 	}
 
 	public Long[][] computeBitStats() {
-		
+
 		Long[][] a = new Long[2][64];
-		for (int i=0; i<2; i++) {
-			for (int j=0; j<64; j++) {
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 64; j++) {
 				a[i][j] = new Long(0);
 			}
 		}
-		
-		for (int i=0; i<sequence.size(); i++) {
-			for (int j=0; j<64; j++) {
-				if ( NumberPattern.getBit(j, sequence.get(i))) {
+
+		for (int i = 0; i < sequence.size(); i++) {
+			for (int j = 0; j < 64; j++) {
+				if (NumberPattern.getBit(j, sequence.get(i))) {
 					a[0][j]++;
 				} else {
 					a[1][j]++;
 				}
 			}
 		}
-		
-		return a;	
+
+		return a;
 	}
-	
-	public void printBitStats( Long[][] a, File file) {
+
+	public Long[] computeLastEightStats() {
+
+		int numBits = 8;
+		int numValues = numBits << 1;
+
+		Long[] count = new Long[numValues];
+		for (int i = 0; i < sequence.size(); i++) {
+			count[i] = new Long(0L);
+		}
+
+		for (int i = 0; i < sequence.size(); i++) {
+			Integer index = getNumRightBitsAsInteger(numBits, sequence.get(i));
+			count[index]++;
+		}
+
+		return count;
+
+	}
+
+	public void printStats(Long[] count, File file) {
+
 		try {
 			FileWriter fw = new FileWriter(file);
-			
-			for (int i=0; i<64; i++) {
-				Double setPercent = new Double( a[0][i] * 100 ) / new Double((a[0][i] + a[1][i])) ;
-				fw.write("bit " + i + " -> " + String.format("%1$.3f", setPercent) + "\n");		
+
+			for (int i = 0; i < count.length; i++) {
+				fw.write(i + "," + count[i]);
+				;
 			}
 			fw.close();
 		} catch (IOException e) {
 			throw new RuntimeException("Cannot write file: " + file.getAbsolutePath());
 		}
+
+	}
+
+	private Integer getNumRightBitsAsInteger(int numBits, Long value) {
+		Long r = 1L << numBits - 1;
+		Long result = value & r;
+		return result.intValue();
+	}
+
+	public void printBitStats(Long[][] a, File file) {
+		try {
+			FileWriter fw = new FileWriter(file);
+
+			for (int i = 0; i < 64; i++) {
+				Double setPercent = new Double(a[0][i] * 100) / new Double((a[0][i] + a[1][i]));
+				fw.write("bit " + i + " -> " + String.format("%1$.3f", setPercent) + "\n");
+			}
+			fw.close();
+		} catch (IOException e) {
+			throw new RuntimeException("Cannot write file: " + file.getAbsolutePath());
+		}
+	}
+
+	public void printFactorStats(File file) {
+		try {
+			FileWriter fw = new FileWriter(file);
+
+			for (int i = 0; i < sequence.size(); i++) {
+				fw.write(sequence.get(i) + ",");
+				if (sequence.get(i) < Integer.MAX_VALUE && sequence.get(i) > 1) {
+					List<Integer> factors = Primes.primeFactors(sequence.get(i).intValue());
+					fw.write(i + "," + factors.size());
+					for (int j = 0; j < factors.size(); j++) {
+						fw.write("," + j);
+						
+					}
+					fw.write("\n");
+				} else {
+					fw.write("0\n");
+				}
+			}
+			fw.close();
+		} catch (IOException e) {
+			throw new RuntimeException("Cannot write file: " + file.getAbsolutePath());
+		}
+
 	}
 }
